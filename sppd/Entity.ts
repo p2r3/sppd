@@ -1,7 +1,6 @@
 import { Demo } from "./Demo.ts";
 import { DemoBuffer } from "./DemoBuffer.ts";
 import { Vector } from "./Vector.ts";
-import { SvcPacketEntities } from "./NetSvcMessage.ts";
 import {
   DataTableProperty,
   DataTablePropertyType,

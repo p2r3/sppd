@@ -1,5 +1,4 @@
 import { Demo } from "./Demo.ts";
-import { DemoBuffer } from "./DemoBuffer.ts";
 import { EntityProperty, EntityBaseLine } from "./Entity.ts";
 
 export class StringTableEntry {
