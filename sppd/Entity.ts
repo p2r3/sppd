@@ -531,6 +531,13 @@ export class Entity {
 
   // Imitations of VScript entity methods
 
+  GetProperties (): Map<string, EntityPropertyValueType> {
+    return new Map(this.properties
+      .filter(p => p)
+      .map(p => [p.property.name, p.value])
+    );
+  }
+
   GetProperty (name: string): EntityPropertyValueType | null {
     const property = this.properties.find(p => p &&
       p.property.name === name
