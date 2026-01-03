@@ -149,4 +149,26 @@ export class DemoBuffer {
     return j;
   }
 
+  setBit (at: number, value: number | boolean): void {
+    const byteIndex = Math.floor(at / 8);
+    const bitIndex = at % 8;
+    const byte = this.bytes[byteIndex] || 0;
+    const bit = 1 << bitIndex;
+    if (value) {
+      this.bytes[byteIndex] = byte | bit;
+    } else {
+      this.bytes[byteIndex] = byte & ~bit;
+    }
+  }
+
+  setInt (from: number, size: number, value: number): void {
+    for (let i = 0; i < size; i ++) {
+      this.setBit(from + i, value & (1 << i));
+    }
+  }
+  setSignedInt (from: number, size: number, value: number): void {
+    this.setInt(from + 1, size - 1, Math.abs(value));
+    this.setBit(from, value < 0);
+  }
+
 }

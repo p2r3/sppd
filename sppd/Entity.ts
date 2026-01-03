@@ -273,6 +273,19 @@ export class EntityProperty {
 
   }
 
+  setFromInt (demo: Demo, value: number, offset: number = 0): void {
+    const baseProperty = this.property.baseProperty;
+    if (baseProperty.type !== DataTablePropertyType.Int) {
+      throw "Tried to call setFromInt on non-int property.";
+    }
+
+    if (baseProperty.hasFlag(DataTablePropertyFlag.Unsigned)) {
+      demo.buf.setInt(this.bufferFrom + offset, this.bufferSize, value);
+    } else {
+      demo.buf.setSignedInt(this.bufferFrom + offset, this.bufferSize, value);
+    }
+  }
+
   copyArrayProperty (): EntityProperty {
     if (!Array.isArray(this.value)) throw "Tried to copy array of non-array property.";
     return new EntityProperty(this.index, this.property, this.bufferFrom, this.bufferSize, this.value.slice());
