@@ -31,4 +31,4 @@ Because of the similarity to VScript, you can somewhat apply the [VDC "List of P
 ## Acknowledgements
 - [**UntitledParser**](https://github.com/UncraftedName/UntitledParser) - most of the entity handling code is derived from here.
 - [**dem.nekz.me**](https://dem.nekz.me/) - guided the initial program layout and message parsing.
-- **mlugg** - for consulting on a different project, which indirectly inspired this one.
+- [**mlugg**](https://github.com/mlugg) - for consulting on a different project, which indirectly inspired this one.
