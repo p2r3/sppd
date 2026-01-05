@@ -852,6 +852,22 @@ export class Entity {
     return modelName || "";
   }
 
+  SetModel (model: string): boolean {
+    if (!this.source) return false;
+    const normalizedModel = model.replaceAll("\\", "/");
+    const models = this.source?.state.stringTables?.get("modelprecache");
+    if (!models) return false;
+    const modelIndex = models.entries.findIndex(m =>
+      m.entryName.replaceAll("\\", "/") === normalizedModel
+    );
+    if (modelIndex === -1) return false;
+    const property = this.properties.find(p => p &&
+      p.property.name === "m_nModelIndex"
+    );
+    property?.setValue(this.source, modelIndex);
+    return true;
+  }
+
   GetHealth (): number {
     const health = this.GetProperty("m_iHealth");
     if (typeof health !== "number") return -1;

@@ -166,6 +166,15 @@ const demo = new Demo(demoBytes, (demo) => {
 fs.writeFileSync("output.dem", demo.buf.bytes);
 ```
 
+Swapping cube models with security cameras:
+```js
+entities.FindByClassnameAll("prop_weighted_cube").forEach(cube => {
+  const success = cube.SetModel("models/props/security_camera.mdl");
+  // `success` is false if the model isn't precached
+  if (!success) console.warn(`Failed to set model on tick ${demo.state.tick}.`);
+});
+```
+
 #### Miscellaneous quirks
 
 - The `entities` object can also be accessed like a regular array. It contains all entities, indexed by their entindex:
