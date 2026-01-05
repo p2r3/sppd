@@ -783,21 +783,19 @@ export class Entity {
     return new Vector(pitch, yaw);
   }
 
-  SetAngles (angles: Vector): void {
+  SetAngles (pitch: number, yaw: number, roll: number): void {
     if (!this.source) return;
     const properties = new Map(this.properties
       .filter(p => p)
       .map(p => [p.property.name, p])
     );
+    const angles = new Vector(pitch, yaw, roll);
 
     const angRotation = properties.get("m_angRotation");
     const eyePitch = properties.get("m_angEyeAngles[0]");
     const eyeYaw = properties.get("m_angEyeAngles[1]");
 
-    if (angRotation) {
-      angRotation.setValue(this.source, angles);
-      return;
-    }
+    angRotation?.setValue(this.source, angles);
     eyePitch?.setValue(this.source, angles.x);
     eyeYaw?.setValue(this.source, angles.y);
   }
