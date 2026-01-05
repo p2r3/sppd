@@ -82,7 +82,7 @@ export class DataTable {
   public name: string;
   public properties: DataTableProperty[] = [];
   constructor (demo: Demo) {
-    this.needsDecoder = !!demo.buf.nextInt(1);
+    this.needsDecoder = !!demo.buf.nextBit();
     this.name = demo.buf.nextNullTerminatedString();
     const propertiesCount = demo.buf.nextInt(10);
     for (let i = 0; i < propertiesCount; i ++) {

@@ -91,7 +91,7 @@ export class DataTablesMessage extends Message {
     const dataLength = demo.buf.nextInt(32) * 8;
     const dataEnd = dataLength + demo.buf.cursor;
 
-    while (demo.buf.nextInt(1)) {
+    while (demo.buf.nextBit()) {
       this.dataTables.push(new DataTable(demo));
     }
     const classCount = demo.buf.nextInt(16);
@@ -185,24 +185,24 @@ export class UserCmdInfo {
   mouseDeltaX?: number
   mouseDeltaY?: number
   constructor (dbuffer: DemoBuffer) {
-    if (dbuffer.nextInt(1)) this.number = dbuffer.nextInt(32);
-    if (dbuffer.nextInt(1)) this.tickCount = dbuffer.nextInt(32);
-    if (dbuffer.nextInt(1)) this.viewAnglesX = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.viewAnglesY = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.viewAnglesZ = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.forwardMove = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.sideMove = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.upMove = dbuffer.nextFloat();
-    if (dbuffer.nextInt(1)) this.buttons = dbuffer.nextInt(32);
-    if (dbuffer.nextInt(1)) this.impulse = dbuffer.nextInt(8);
-    if (dbuffer.nextInt(1)) {
+    if (dbuffer.nextBit()) this.number = dbuffer.nextInt(32);
+    if (dbuffer.nextBit()) this.tickCount = dbuffer.nextInt(32);
+    if (dbuffer.nextBit()) this.viewAnglesX = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.viewAnglesY = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.viewAnglesZ = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.forwardMove = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.sideMove = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.upMove = dbuffer.nextFloat();
+    if (dbuffer.nextBit()) this.buttons = dbuffer.nextInt(32);
+    if (dbuffer.nextBit()) this.impulse = dbuffer.nextInt(8);
+    if (dbuffer.nextBit()) {
       this.weaponSelect = dbuffer.nextInt(11);
-      if (dbuffer.nextInt(1)) {
+      if (dbuffer.nextBit()) {
         this.weaponSubtype = dbuffer.nextInt(6);
       }
     }
-    if (dbuffer.nextInt(1)) this.mouseDeltaX = dbuffer.nextInt(16);
-    if (dbuffer.nextInt(1)) this.mouseDeltaY = dbuffer.nextInt(16);
+    if (dbuffer.nextBit()) this.mouseDeltaX = dbuffer.nextInt(16);
+    if (dbuffer.nextBit()) this.mouseDeltaY = dbuffer.nextInt(16);
   }
 }
 export class UserCmdMessage extends Message {

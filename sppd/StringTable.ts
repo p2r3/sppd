@@ -47,8 +47,8 @@ export class PlayerInfo extends StringTableEntry {
     demo.buf.nextInt(3);
     this.friendsID = demo.buf.nextInt(32);
     this.friendsName = demo.buf.nextTrimmedString(33);
-    this.fakePlayer = !!demo.buf.nextInt(1);
-    this.isHLTV = !!demo.buf.nextInt(1);
+    this.fakePlayer = !!demo.buf.nextBit();
+    this.isHLTV = !!demo.buf.nextBit();
     demo.buf.nextInt(2);
     this.customFilesCRC = [];
     for (let i = 0; i < 4; i ++) {
@@ -122,7 +122,7 @@ export class StringTableClass {
   public data?: string;
   constructor (demo: Demo) {
     this.name = demo.buf.nextNullTerminatedString();
-    const hasData = !!demo.buf.nextInt(1);
+    const hasData = !!demo.buf.nextBit();
     if (hasData) {
       const length = demo.buf.nextInt(16);
       this.data = demo.buf.nextString(length);
@@ -155,7 +155,7 @@ export class StringTable {
     const entryCount = demo.buf.nextInt(16);
     for (let i = 0; i < entryCount; i ++) {
       const entryName = demo.buf.nextNullTerminatedString();
-      const entryHasData = !!demo.buf.nextInt(1);
+      const entryHasData = !!demo.buf.nextBit();
       if (entryHasData) {
         const dataLength = demo.buf.nextInt(16) * 8;
         const dataEnd = demo.buf.cursor + dataLength;
@@ -166,7 +166,7 @@ export class StringTable {
       }
     }
 
-    const hasClasses = !!demo.buf.nextInt(1);
+    const hasClasses = !!demo.buf.nextBit();
     if (hasClasses) {
       const classCount = demo.buf.nextInt(16);
       for (let i = 0; i < classCount; i ++) {

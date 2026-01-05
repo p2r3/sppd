@@ -101,10 +101,10 @@ export class EntityProperty {
     ) {
 
       let value = 0;
-      const hasInt = demo.buf.nextInt(1);
-      const hasFrac = demo.buf.nextInt(1);
+      const hasInt = demo.buf.nextBit();
+      const hasFrac = demo.buf.nextBit();
       if (hasInt || hasFrac) {
-        const sign = demo.buf.nextInt(1);
+        const sign = demo.buf.nextBit();
         if (hasInt) value += demo.buf.nextInt(14) + 1;
         if (hasFrac) value += demo.buf.nextInt(5) * (1 / (1 << 5));
         if (sign) value = -value;
@@ -120,16 +120,16 @@ export class EntityProperty {
 
       let value = 0;
       let sign = false;
-      const inBounds = demo.buf.nextInt(1);
+      const inBounds = demo.buf.nextBit();
       if (baseProperty.hasFlag(DataTablePropertyFlag.CoordMpInt)) {
-        if (demo.buf.nextInt(1)) {
-          sign = !!demo.buf.nextInt(1);
+        if (demo.buf.nextBit()) {
+          sign = !!demo.buf.nextBit();
           if (inBounds) value = demo.buf.nextInt(11) + 1;
           else value = demo.buf.nextInt(14) + 1;
         }
       } else {
-        let intVal = demo.buf.nextInt(1);
-        sign = !!demo.buf.nextInt(1);
+        let intVal = demo.buf.nextBit();
+        sign = !!demo.buf.nextBit();
         if (intVal) {
           if (inBounds) intVal = demo.buf.nextInt(11) + 1;
           else intVal = demo.buf.nextInt(14) + 1;
@@ -153,7 +153,7 @@ export class EntityProperty {
       baseProperty.hasFlag(DataTablePropertyFlag.Normal)
     ) {
 
-      const sign = demo.buf.nextInt(1);
+      const sign = demo.buf.nextBit();
       let value = demo.buf.nextInt(11) * (1 / ((1 << 11) - 1));
       if (sign) value = -value;
       return value;
@@ -190,7 +190,7 @@ export class EntityProperty {
     );
 
     if (baseProperty.hasFlag(DataTablePropertyFlag.Normal)) {
-      const sign = demo.buf.nextInt(1);
+      const sign = demo.buf.nextBit();
       const distSqr = vector.x * vector.x + vector.y * vector.y;
       if (distSqr < 1) vector.z = Math.sqrt(1 - distSqr);
       else vector.z = 0;
@@ -301,7 +301,7 @@ export class EntityProperty {
   static readProperties (demo: Demo, flatProperties: FlatProperty[]): EntityProperty[] {
     const properties: EntityProperty[] = [];
 
-    const newWay = !!demo.buf.nextInt(1);
+    const newWay = !!demo.buf.nextBit();
     let i = -1;
     while ((i = demo.buf.nextFieldIndex(i, newWay)) !== -1) {
       if (i < 0 || i >= flatProperties.length) {

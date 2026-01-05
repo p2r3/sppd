@@ -80,7 +80,7 @@ export class NetFile extends NetSvcMessage {
     super();
     this.transferID = demo.buf.nextInt(32);
     this.fileName = demo.buf.nextNullTerminatedString();
-    this.fileRequested = !!demo.buf.nextInt(1);
+    this.fileRequested = !!demo.buf.nextBit();
   }
 }
 
@@ -88,7 +88,7 @@ export class NetSplitScreenUser extends NetSvcMessage {
   public bool: boolean;
   constructor (demo: Demo) {
     super();
-    this.bool = !!demo.buf.nextInt(1);
+    this.bool = !!demo.buf.nextBit();
   }
 }
 
@@ -176,8 +176,8 @@ export class SvcServerInfo extends NetSvcMessage {
     super();
     this.protocol = demo.buf.nextInt(16);
     this.serverCount = demo.buf.nextInt(32);
-    this.isHLTV = !!demo.buf.nextInt(1);
-    this.isDedicated = !!demo.buf.nextInt(1);
+    this.isHLTV = !!demo.buf.nextBit();
+    this.isDedicated = !!demo.buf.nextBit();
     this.clientCRC = demo.buf.nextInt(32);
     this.maxClasses = demo.buf.nextInt(16);
     this.mapCRC = demo.buf.nextInt(32);
@@ -198,7 +198,7 @@ export class SvcSendTable extends NetSvcMessage {
   public properties: number;
   constructor (demo: Demo) {
     super();
-    this.needsDecoder = !!demo.buf.nextInt(1);
+    this.needsDecoder = !!demo.buf.nextBit();
     const length = demo.buf.nextInt(8);
     this.properties = demo.buf.nextInt(length);
   }
@@ -215,7 +215,7 @@ export class SvcClassInfo extends NetSvcMessage {
   constructor (demo: Demo) {
     super();
     const classCount = demo.buf.nextInt(16);
-    const createOnClient = !!demo.buf.nextInt(1);
+    const createOnClient = !!demo.buf.nextBit();
     if (!createOnClient) {
       this.serverClasses = [];
       for (let i = 0; i < classCount; i ++) {
@@ -234,7 +234,7 @@ export class SvcSetPause extends NetSvcMessage {
   public paused: boolean;
   constructor (demo: Demo) {
     super();
-    this.paused = !!demo.buf.nextInt(1);
+    this.paused = !!demo.buf.nextBit();
   }
 }
 
@@ -251,7 +251,7 @@ export class SvcCreateStringTable extends NetSvcMessage {
     this.maxEntries = demo.buf.nextInt(16);
     this.entryCount = demo.buf.nextInt(DemoBuffer.highestBitIndex(this.maxEntries) + 1);
     const dataLength = demo.buf.nextInt(20);
-    const udataFixedSize = !!demo.buf.nextInt(1);
+    const udataFixedSize = !!demo.buf.nextBit();
     if (udataFixedSize) {
       this.userDataSize = demo.buf.nextInt(12);
       this.userDataSizeBits = demo.buf.nextInt(4);
@@ -279,7 +279,7 @@ export class SvcUpdateStringTable extends NetSvcMessage {
   constructor (demo: Demo) {
     super();
     this.tableID = demo.buf.nextInt(5);
-    if (demo.buf.nextInt(1)) {
+    if (demo.buf.nextBit()) {
       this.changedEntries = demo.buf.nextInt(16);
     }
     const dataLength = demo.buf.nextInt(20);
@@ -296,7 +296,7 @@ export class SvcUpdateStringTable extends NetSvcMessage {
       demo.buf.cursor = dataEnd;
       return;
     }
-    const dictionaryEnabled = demo.buf.nextInt(1);
+    const dictionaryEnabled = demo.buf.nextBit();
     if (dictionaryEnabled) {
       console.warn("Unsupported string table update with dictionary.");
       demo.buf.cursor = dataEnd;
@@ -308,7 +308,7 @@ export class SvcUpdateStringTable extends NetSvcMessage {
 
     for (let i = 0; i < this.changedEntries; i ++) {
 
-      if (demo.buf.nextInt(1)) {
+      if (demo.buf.nextBit()) {
         entryIndex ++;
       } else {
         entryIndex = demo.buf.nextInt(DemoBuffer.highestBitIndex(table.maxEntries));
@@ -321,8 +321,8 @@ export class SvcUpdateStringTable extends NetSvcMessage {
       }
 
       let entryName = "";
-      if (demo.buf.nextInt(1)) {
-        const compressed = demo.buf.nextInt(1);
+      if (demo.buf.nextBit()) {
+        const compressed = demo.buf.nextBit();
         if (compressed) {
 
           const historyIndex = demo.buf.nextInt(5);
@@ -353,7 +353,7 @@ export class SvcUpdateStringTable extends NetSvcMessage {
       }
       history.push(entryName);
 
-      const hasData = demo.buf.nextInt(1);
+      const hasData = demo.buf.nextBit();
       if (!hasData) continue;
 
       const entryDataLength = table.userDataSizeBits || (demo.buf.nextInt(14) * 8);
@@ -397,7 +397,7 @@ export class SvcVoiceData extends NetSvcMessage {
     this.proximity = demo.buf.nextInt(8);
     const length = demo.buf.nextInt(16);
     for (let i = 0; i < Message.MSSC; i ++) {
-      this.audible.push(!!demo.buf.nextInt(1));
+      this.audible.push(!!demo.buf.nextBit());
     }
     this.data = demo.buf.nextBytes(length);
   }
@@ -416,7 +416,7 @@ export class SvcFixAngle extends NetSvcMessage {
   public angle: Vector;
   constructor (demo: Demo) {
     super();
-    this.relative = !!demo.buf.nextInt(1);
+    this.relative = !!demo.buf.nextBit();
     this.angle = new Vector(
       demo.buf.nextInt(16) * 360 / (1 << 16),
       demo.buf.nextInt(16) * 360 / (1 << 16),
@@ -451,7 +451,7 @@ export class SvcSounds extends NetSvcMessage { // TODO: Full implementation
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.reliable = !!demo.buf.nextInt(1);
+    this.reliable = !!demo.buf.nextBit();
     if (this.reliable) this.count = 1;
     else this.count = demo.buf.nextInt(8);
     const length = this.reliable ? demo.buf.nextInt(8) : demo.buf.nextInt(16);
@@ -464,22 +464,22 @@ export class SvcBspDecal extends NetSvcMessage { // TODO: Full implementation
     super();
     let coordinates = 0;
     for (let i = 0; i < 3; i ++) {
-      coordinates += demo.buf.nextInt(1);
+      coordinates += demo.buf.nextBit();
     }
     for (let i = 0; i < coordinates; i ++) {
-      const integer = demo.buf.nextInt(1);
-      const fraction = demo.buf.nextInt(1);
+      const integer = demo.buf.nextBit();
+      const fraction = demo.buf.nextBit();
       if (integer || fraction) {
-        demo.buf.nextInt(1);
+        demo.buf.nextBit();
         if (integer) demo.buf.nextInt(14);
         if (fraction) demo.buf.nextInt(5);
       }
     }
     demo.buf.nextInt(9);
-    if (demo.buf.nextInt(1)) {
+    if (demo.buf.nextBit()) {
       demo.buf.nextInt(22);
     }
-    demo.buf.nextInt(1);
+    demo.buf.nextBit();
   }
 }
 
@@ -488,7 +488,7 @@ export class SvcSplitScreen extends NetSvcMessage {
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.removePlayer = !!demo.buf.nextInt(1);
+    this.removePlayer = !!demo.buf.nextBit();
     const length = demo.buf.nextInt(11);
     this.data = demo.buf.nextBytes(length);
   }
@@ -539,14 +539,14 @@ export class SvcPacketEntities extends NetSvcMessage {
     super();
 
     this.maxEntries = demo.buf.nextInt(11);
-    this.isDelta = !!demo.buf.nextInt(1);
+    this.isDelta = !!demo.buf.nextBit();
     if (this.isDelta) {
       this.deltaFrom = demo.buf.nextSignedInt(32);
     }
-    this.baseline = demo.buf.nextInt(1);
+    this.baseline = demo.buf.nextBit();
     this.updatedEntries = demo.buf.nextInt(11);
     const dataLength = demo.buf.nextInt(20);
-    this.updateBaseline = !!demo.buf.nextInt(1);
+    this.updateBaseline = !!demo.buf.nextBit();
     const dataEnd = demo.buf.cursor + dataLength;
 
     if (!demo.state.dataTables || !demo.state.serverClasses || !demo.state.parserClasses) {
@@ -649,7 +649,7 @@ export class SvcPacketEntities extends NetSvcMessage {
     }
 
     if (this.isDelta) {
-      while (demo.buf.nextInt(1)) {
+      while (demo.buf.nextBit()) {
         const index = demo.buf.nextInt(11);
         const entity = demo.state.entities[index];
         if (!entity) continue;

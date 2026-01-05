@@ -9,6 +9,12 @@ export class DemoBuffer {
     this.cursor = 0;
   }
 
+  getBit (at: number): number {
+    const bitOffset = at % 8;
+    const byteOffset = Math.floor(at / 8);
+    const byte = this.bytes[byteOffset] || 0;
+    return (byte >> bitOffset) & 1;
+  }
   getByte (at: number): number {
     const bitOffset = at % 8;
     const byteOffset = Math.floor(at / 8);
@@ -72,6 +78,9 @@ export class DemoBuffer {
     return view.getFloat64(0, true);
   }
 
+  nextBit (): number {
+    return this.getBit(this.cursor++);
+  }
   nextByte (): number {
     const byte = this.getByte(this.cursor);
     this.cursor += 8;
@@ -128,9 +137,9 @@ export class DemoBuffer {
     return ret;
   }
   nextFieldIndex (lastIndex: number, newWay: boolean): number {
-    if (newWay && this.nextInt(1)) return lastIndex + 1;
+    if (newWay && this.nextBit()) return lastIndex + 1;
     let ret;
-    if (newWay && this.nextInt(1)) {
+    if (newWay && this.nextBit()) {
       ret = this.nextInt(3);
     } else {
       ret = this.nextInt(5);
