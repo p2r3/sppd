@@ -19,15 +19,7 @@ const demo: Demo = new Demo(demoBytes, (demo) => {
 
 });
 ```
-The entity interface is deliberately shaped like the VScript API to make it more familiar to those who've scripted for Portal 2 before. That said, there are a few key differences:
-- For obvious reasons, only getter methods are exposed. However, I do think it would be interesting to allow for modifying the demo this way. I might look into that.
-- `GetClassname` may return the _server_ class name (e.g. CBaseViewModel) when the prettier "signifier name" is not available.
-- Consequently, searching by classname with `FindByClassname` or similar will include results for matching server class names.
-- The `demo.state.entities` object can be handled like a typical array, and contains all entities that exist on the current tick, indexed by their entindex.
-- Every search function (except for `FindBy...Nearest`) has an "All" variant that omits the first argument, and returns an _array_ of matches. For example, `FindByNameAll` will return an array of entities that match the given targetname.
-- You can use `GetProperties()` on an entity to get a `Map` of all available properties and their values, or use `GetProperty(name)` to get the value of a specific property.
-
-Because of the similarity to VScript, you can somewhat apply the [VDC "List of Portal 2 Script Functions"](https://developer.valvesoftware.com/wiki/Portal_2/Scripting/Script_Functions) here, too.
+The entity interface is deliberately shaped like the VScript API to make it more familiar to those who've scripted for Portal 2 before. For more details, see the [documentation](DOCUMENTATION.md).
 
 ## Acknowledgements
 - [**UntitledParser**](https://github.com/UncraftedName/UntitledParser) - most of the entity handling code is derived from here.
