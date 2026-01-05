@@ -169,8 +169,8 @@ export class DemoBuffer {
     }
   }
   setSignedInt (from: number, size: number, value: number): void {
-    this.setInt(from + 1, size - 1, Math.abs(value));
-    this.setBit(from, value < 0);
+    if (value < 0) value = (1 << size) + value;
+    this.setInt(from, size, value);
   }
 
 }
