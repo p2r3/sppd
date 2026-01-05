@@ -937,6 +937,17 @@ export class Entities extends Array<Entity> {
     return null;
   }
 
+  First (): Entity | null {
+    for (const entity of this) {
+      if (entity) return entity;
+    }
+    return null;
+  }
+
+  Next (start: Entity | null): Entity | null {
+    return this.FindByCallback(start, () => true);
+  }
+
   FindByProperty (start: Entity | null, key: string, value: EntityPropertyValueType): Entity | null {
     return this.FindByCallback(start, (current: Entity) => {
       return current.properties.some(p => p &&
