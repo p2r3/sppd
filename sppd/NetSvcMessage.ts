@@ -167,7 +167,7 @@ export class SvcServerInfo extends NetSvcMessage {
   public maxClients: number;
   public _unknown: Uint8Array;
   public tickInterval: number;
-  public clientOS: string;
+  public serverOS: string;
   public gameDirectory: string;
   public mapName: string;
   public skyName: string;
@@ -185,7 +185,7 @@ export class SvcServerInfo extends NetSvcMessage {
     this.maxClients = demo.buf.nextByte();
     this._unknown = demo.buf.nextBytes(32);
     this.tickInterval = demo.buf.nextFloat();
-    this.clientOS = demo.buf.nextString(8);
+    this.serverOS = demo.buf.nextString(8);
     this.gameDirectory = demo.buf.nextNullTerminatedString();
     this.mapName = demo.buf.nextNullTerminatedString();
     this.skyName = demo.buf.nextNullTerminatedString();
