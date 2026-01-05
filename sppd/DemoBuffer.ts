@@ -182,4 +182,10 @@ export class DemoBuffer {
     this.setInt(from, size, value);
   }
 
+  setFloat (from: number, value: number): void {
+    const dataView = new DataView(new ArrayBuffer(4));
+    dataView.setFloat32(0, value);
+    this.setInt(from, 32, dataView.getUint32(0));
+  }
+
 }

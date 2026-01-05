@@ -273,17 +273,177 @@ export class EntityProperty {
 
   }
 
-  setFromInt (demo: Demo, value: number, offset: number = 0): void {
+  setFromInt (demo: Demo, value: number, localOffset: number = 0): number {
     const baseProperty = this.property.baseProperty;
-    if (baseProperty.type !== DataTablePropertyType.Int) {
-      throw "Tried to call setFromInt on non-int property.";
-    }
 
     if (baseProperty.hasFlag(DataTablePropertyFlag.Unsigned)) {
-      demo.buf.setInt(this.bufferFrom + offset, this.bufferSize, value);
+      demo.buf.setInt(this.bufferFrom + localOffset, this.bufferSize, value);
     } else {
-      demo.buf.setSignedInt(this.bufferFrom + offset, this.bufferSize, value);
+      demo.buf.setSignedInt(this.bufferFrom + localOffset, this.bufferSize, value);
     }
+    return this.bufferSize;
+  }
+
+  setFromFloat (demo: Demo, value: number, localOffset: number = 0): number {
+    const baseProperty = this.property.baseProperty;
+    if (!baseProperty.value) throw "Invalid property definition.";
+
+    const absValue = Math.abs(value);
+    const cursorStart = this.bufferFrom + localOffset;
+    let cursor = cursorStart;
+
+    if (
+      baseProperty.hasFlag(DataTablePropertyFlag.Coord)
+    ) {
+
+      const hasInt = demo.buf.getBit(cursor++);
+      const hasFrac = demo.buf.getBit(cursor++);
+      if (!hasInt && !hasFrac) return 2;
+
+      demo.buf.setBit(cursor++, value < 0);
+      if (hasInt) {
+        demo.buf.setInt(cursor, 14, Math.floor(Math.max(absValue - 1, 0)));
+        cursor += 14;
+      }
+      if (hasFrac) {
+        demo.buf.setInt(cursor, 5, Math.round(absValue / (1 / (1 << 5))));
+        cursor += 5;
+      }
+
+      return cursor - cursorStart;
+    }
+    if (
+      baseProperty.hasFlag(DataTablePropertyFlag.CoordMp)
+      || baseProperty.hasFlag(DataTablePropertyFlag.CoordMpLp)
+      || baseProperty.hasFlag(DataTablePropertyFlag.CoordMpInt)
+    ) {
+
+      const isInt = baseProperty.hasFlag(DataTablePropertyFlag.CoordMpInt);
+      const isLP = baseProperty.hasFlag(DataTablePropertyFlag.CoordMpLp);
+      const precision = isLP ? 3 : 5;
+      const intBits = demo.buf.getBit(cursor++) ? 11 : 14;
+
+      if (isInt) {
+        if (demo.buf.getBit(cursor++)) {
+          demo.buf.setBit(cursor++, value < 0);
+          demo.buf.setInt(cursor, intBits, Math.max(0, absValue - 1));
+          cursor += intBits;
+        }
+      } else {
+        const hasInt = demo.buf.getBit(cursor++);
+        demo.buf.setBit(cursor++, value < 0);
+        if (hasInt) {
+          demo.buf.setInt(cursor, intBits, Math.max(0, absValue - 1));
+          cursor += intBits;
+        }
+        const fraction = (absValue % 1) / (1 << precision);
+        demo.buf.setInt(cursor, precision, Math.round(fraction));
+        cursor += precision;
+      }
+
+      return cursor - cursorStart;
+    }
+    if (
+      baseProperty.hasFlag(DataTablePropertyFlag.NoScale)
+    ) {
+
+      demo.buf.setFloat(cursor, value);
+
+      return 32;
+    }
+    if (
+      baseProperty.hasFlag(DataTablePropertyFlag.Normal)
+    ) {
+
+      demo.buf.setBit(cursor++, value < 0);
+      demo.buf.setInt(cursor, 11, Math.round(absValue * ((1 << 11) - 1)));
+
+      return 12;
+    }
+    if (
+      baseProperty.hasFlag(DataTablePropertyFlag.CellCoord)
+      || baseProperty.hasFlag(DataTablePropertyFlag.CellCoordLp)
+      || baseProperty.hasFlag(DataTablePropertyFlag.CellCoordInt)
+    ) {
+
+      const isInt = baseProperty.hasFlag(DataTablePropertyFlag.CellCoordInt);
+      const isLP = baseProperty.hasFlag(DataTablePropertyFlag.CellCoordLp);
+      const precision = isLP ? 3 : 5;
+
+      demo.buf.setInt(cursor, baseProperty.value.bits, Math.floor(absValue));
+      if (isInt) return baseProperty.value.bits;
+      cursor += baseProperty.value.bits;
+
+      const fraction = (absValue % 1) / (1 << precision);
+      demo.buf.setInt(cursor, precision, Math.round(fraction));
+      return baseProperty.value.bits + precision;
+
+    }
+
+    const { high, low, bits } = baseProperty.value;
+
+    const interp = Math.max(0, (value - low) / (high - low));
+    const dwInterp = interp * ((1 << bits) - 1);
+    demo.buf.setInt(cursor, bits, dwInterp);
+
+    return bits;
+  }
+
+  setFromVector (demo: Demo, vector: Vector, localOffset: number = 0): number {
+    const baseProperty = this.property.baseProperty;
+
+    const cursorStart = this.bufferFrom + localOffset;
+    let cursor = cursorStart;
+
+    cursor += this.setFromFloat(demo, vector.x, 0);
+    cursor += this.setFromFloat(demo, vector.y, cursor - cursorStart);
+
+    if (baseProperty.type === DataTablePropertyType.Vector2) {
+      return cursor - cursorStart;
+    }
+
+    if (baseProperty.hasFlag(DataTablePropertyFlag.Normal)) {
+      demo.buf.setBit(cursor++, vector.z < 0);
+    } else {
+      cursor += this.setFromFloat(demo, vector.z, cursor - cursorStart);
+    }
+
+    return cursor - cursorStart;
+  }
+
+  setFromString (demo: Demo, value: string, localOffset: number = 0): number {
+    const start = this.bufferFrom + localOffset;
+    const length = demo.buf.getInt(start, 9);
+    for (let i = 0; i < length; i ++) {
+      const char = value.charCodeAt(i) || 0;
+      demo.buf.setInt(9 + i * 8, 8, char);
+    }
+    return length * 8 + 9;
+  }
+
+  setValue (demo: Demo, value: EntityPropertyValueType): void {
+    switch (this.property.baseProperty.type) {
+
+      case DataTablePropertyType.Int:
+        if (typeof value !== "number") break;
+        value = this.setFromInt(demo, value);
+        return;
+      case DataTablePropertyType.Float:
+        if (typeof value !== "number") break;
+        value = this.setFromFloat(demo, value);
+        return;
+      case DataTablePropertyType.Vector2:
+      case DataTablePropertyType.Vector3:
+        if (!(value instanceof Vector)) break;
+        value = this.setFromVector(demo, value);
+        return;
+      case DataTablePropertyType.String:
+        if (typeof value !== "string") break;
+        value = this.setFromString(demo, value);
+        return;
+
+    }
+    throw `Value "${value.toString()}" not supported for property "${this.property.name}".`;
   }
 
   copyArrayProperty (): EntityProperty {
@@ -546,6 +706,19 @@ export class Entity {
     return property.value;
   }
 
+  SetProperty (name: string, value: EntityPropertyValueType): void {
+    const property = this.properties.find(p => p &&
+      p.property.name === name
+    );
+    if (!property) {
+      throw `Property "${name}" does not exist on entity ${this.index}.`;
+    }
+    if (!this.source) {
+      throw `Cannot write properties of artificial entity ${this.index}.`;
+    }
+    property.setValue(this.source, value);
+  }
+
   GetOrigin (): Vector {
     const parent = this.GetMoveParent();
     const parentOrigin = parent ? parent.GetOrigin() : new Vector();
@@ -569,6 +742,34 @@ export class Entity {
     return origin.Add(cellPosition).Add(parentOrigin);
   }
 
+  SetAbsOrigin (origin: Vector): void {
+    if (!this.source) return;
+    const properties = new Map(this.properties
+      .filter(p => p)
+      .map(p => [p.property.name, p])
+    );
+
+    const vecOrigin = properties.get("m_vecOrigin");
+    if (!vecOrigin) return;
+
+    const cellX = properties.get("m_cellX");
+    const cellY = properties.get("m_cellY");
+    const cellZ = properties.get("m_cellZ");
+
+    const cellPosition = new Vector(origin.x % 32, origin.y % 32, origin.z % 32);
+    vecOrigin.setValue(this.source, cellPosition);
+
+    cellX?.setValue(this.source, Math.floor(origin.x / 32) + 512);
+    cellY?.setValue(this.source, Math.floor(origin.y / 32) + 512);
+    cellZ?.setValue(this.source, Math.floor(origin.z / 32) + 512);
+  }
+
+  SetOrigin (origin: Vector): void {
+    const parent = this.GetMoveParent();
+    const parentOrigin = parent ? parent.GetOrigin() : new Vector();
+    this.SetAbsOrigin(origin.Add(parentOrigin));
+  }
+
   GetAngles (): Vector {
     const angles = this.GetProperty("m_angRotation");
     if (angles instanceof Vector) {
@@ -580,6 +781,25 @@ export class Entity {
       return new Vector();
     }
     return new Vector(pitch, yaw);
+  }
+
+  SetAngles (angles: Vector): void {
+    if (!this.source) return;
+    const properties = new Map(this.properties
+      .filter(p => p)
+      .map(p => [p.property.name, p])
+    );
+
+    const angRotation = properties.get("m_angRotation");
+    const eyePitch = properties.get("m_angEyeAngles[0]");
+    const eyeYaw = properties.get("m_angEyeAngles[1]");
+
+    if (angRotation) {
+      angRotation.setValue(this.source, angles);
+      return;
+    }
+    eyePitch?.setValue(this.source, angles.x);
+    eyeYaw?.setValue(this.source, angles.y);
   }
 
   GetVelocity (): Vector {
