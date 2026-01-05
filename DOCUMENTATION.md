@@ -171,7 +171,7 @@ fs.writeFileSync("output.dem", demo.buf.bytes);
   // Index 1 is always the player
   const player = demo.state.entities[1];
 ```
-- Every search function (except for `FindBy...Nearest`) has an "All" variant that omits the first argument, and returns an _array_ of matches. For example, `FindByNameAll` will return an array of entities that match the given targetname:
+- Every search function (except for `FindBy...Nearest`) has an "All" variant that omits the first argument, and returns an _array_ of matches:
 ```js
   // Returns an array of cube entities
   const cubes = entities.FindByClassnameAll("prop_weighted_cube");
