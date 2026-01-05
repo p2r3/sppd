@@ -73,7 +73,9 @@ export class DemoBuffer {
   }
 
   nextByte (): number {
-    return this.getByte(this.cursor);
+    const byte = this.getByte(this.cursor);
+    this.cursor += 8;
+    return byte;
   }
   nextBytes (size: number): Uint8Array {
     const bytes = this.getBitSlice(this.cursor, this.cursor + size);
