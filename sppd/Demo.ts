@@ -82,9 +82,9 @@ export class Demo {
   }
 
   parseMessage (): Message {
-    const type = this.buf.nextInt(8);
+    const type = this.buf.nextByte();
     const tick = this.buf.nextInt(32);
-    const slot = this.buf.nextInt(8);
+    const slot = this.buf.nextByte();
     switch (type) {
       case 1: return new SignOnMessage(tick, slot, this);
       case 2: return new PacketMessage(tick, slot, this);

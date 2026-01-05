@@ -54,7 +54,7 @@ export class PlayerInfo extends StringTableEntry {
     for (let i = 0; i < 4; i ++) {
       this.customFilesCRC.push(demo.buf.nextInt(32));
     }
-    this.filesDownloaded = demo.buf.nextInt(8);
+    this.filesDownloaded = demo.buf.nextByte();
   }
 }
 

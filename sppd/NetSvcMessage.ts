@@ -125,7 +125,7 @@ export class NetSetConVar extends NetSvcMessage {
   public convars: ConVar[] = [];
   constructor (demo: Demo) {
     super();
-    const length = demo.buf.nextInt(8);
+    const length = demo.buf.nextByte();
     for (let i = 0; i < length; i ++) {
       const name = demo.buf.nextNullTerminatedString();
       const value = demo.buf.nextNullTerminatedString();
@@ -142,12 +142,12 @@ export class NetSignonState extends NetSvcMessage {
   public mapName: string;
   constructor (demo: Demo) {
     super();
-    this.signonState = demo.buf.nextInt(8);
+    this.signonState = demo.buf.nextByte();
     this.spawnCount = demo.buf.nextSignedInt(32);
     this.serverPlayerCount = demo.buf.nextInt(32);
     const idsLength = demo.buf.nextInt(32);
     for (let i = 0; i < idsLength; i ++) {
-      const id = demo.buf.nextInt(8);
+      const id = demo.buf.nextByte();
       this.playerNetworkIDs.push(id);
     }
     const mapNameLength = demo.buf.nextInt(32);
@@ -181,8 +181,8 @@ export class SvcServerInfo extends NetSvcMessage {
     this.clientCRC = demo.buf.nextInt(32);
     this.maxClasses = demo.buf.nextInt(16);
     this.mapCRC = demo.buf.nextInt(32);
-    this.playerSlot = demo.buf.nextInt(8);
-    this.maxClients = demo.buf.nextInt(8);
+    this.playerSlot = demo.buf.nextByte();
+    this.maxClients = demo.buf.nextByte();
     this._unknown = demo.buf.nextBytes(32);
     this.tickInterval = demo.buf.nextFloat();
     this.clientOS = demo.buf.nextString(8);
@@ -199,7 +199,7 @@ export class SvcSendTable extends NetSvcMessage {
   constructor (demo: Demo) {
     super();
     this.needsDecoder = !!demo.buf.nextBit();
-    const length = demo.buf.nextInt(8);
+    const length = demo.buf.nextByte();
     this.properties = demo.buf.nextInt(length);
   }
 }
@@ -381,7 +381,7 @@ export class SvcVoiceInit extends NetSvcMessage {
   constructor (demo: Demo) {
     super();
     this.codec = demo.buf.nextNullTerminatedString();
-    this.quality = demo.buf.nextInt(8);
+    this.quality = demo.buf.nextByte();
     if (this.quality === 255) demo.buf.nextFloat();
   }
 }
@@ -393,8 +393,8 @@ export class SvcVoiceData extends NetSvcMessage {
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.client = demo.buf.nextInt(8);
-    this.proximity = demo.buf.nextInt(8);
+    this.client = demo.buf.nextByte();
+    this.proximity = demo.buf.nextByte();
     const length = demo.buf.nextInt(16);
     for (let i = 0; i < Message.MSSC; i ++) {
       this.audible.push(!!demo.buf.nextBit());
@@ -453,8 +453,8 @@ export class SvcSounds extends NetSvcMessage { // TODO: Full implementation
     super();
     this.reliable = !!demo.buf.nextBit();
     if (this.reliable) this.count = 1;
-    else this.count = demo.buf.nextInt(8);
-    const length = this.reliable ? demo.buf.nextInt(8) : demo.buf.nextInt(16);
+    else this.count = demo.buf.nextByte();
+    const length = this.reliable ? demo.buf.nextByte() : demo.buf.nextInt(16);
     this.data = demo.buf.nextBytes(length);
   }
 }
@@ -499,7 +499,7 @@ export class SvcUserMessage extends NetSvcMessage {
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.type = demo.buf.nextInt(8);
+    this.type = demo.buf.nextByte();
     const length = demo.buf.nextInt(12);
     this.data = demo.buf.nextBytes(length);
   }
@@ -668,7 +668,7 @@ export class SvcTempEntities extends NetSvcMessage {
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.entries = demo.buf.nextInt(8);
+    this.entries = demo.buf.nextByte();
     const length = demo.buf.nextInt(17);
     this.data = demo.buf.nextBytes(length);
   }

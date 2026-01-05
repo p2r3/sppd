@@ -46,7 +46,7 @@ export class DataTableProperty {
     this.type = demo.buf.nextInt(5);
     this.name = demo.buf.nextNullTerminatedString();
     this.flags = demo.buf.nextInt(19);
-    this.priority = demo.buf.nextInt(8);
+    this.priority = demo.buf.nextByte();
     const exclude = this.hasFlag(DataTablePropertyFlag.Exclude);
     if (this.type === DataTablePropertyType.DataTable || exclude) {
       this.excludeName = demo.buf.nextNullTerminatedString();

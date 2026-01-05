@@ -144,7 +144,7 @@ export class StringTablesMessage extends Message {
     const dataLength = demo.buf.nextInt(32) * 8;
     const dataEnd = demo.buf.cursor + dataLength;
 
-    const tableCount = demo.buf.nextInt(8);
+    const tableCount = demo.buf.nextByte();
     for (let i = 0; i < tableCount; i ++) {
       const table = StringTable.fromDemo(demo);
       this.tables.push(table);
@@ -194,7 +194,7 @@ export class UserCmdInfo {
     if (dbuffer.nextBit()) this.sideMove = dbuffer.nextFloat();
     if (dbuffer.nextBit()) this.upMove = dbuffer.nextFloat();
     if (dbuffer.nextBit()) this.buttons = dbuffer.nextInt(32);
-    if (dbuffer.nextBit()) this.impulse = dbuffer.nextInt(8);
+    if (dbuffer.nextBit()) this.impulse = dbuffer.nextByte();
     if (dbuffer.nextBit()) {
       this.weaponSelect = dbuffer.nextInt(11);
       if (dbuffer.nextBit()) {
