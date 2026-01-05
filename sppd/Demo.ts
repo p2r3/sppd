@@ -77,6 +77,8 @@ export class Demo {
         lastTick = this.state.tick;
       }
 
+      if (message instanceof StopMessage) break;
+
     }
 
   }
