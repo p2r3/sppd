@@ -114,7 +114,9 @@ This parser also lets you _modify_ properties to an extent, effectively letting 
 - Some properties have a fixed range or reduced precision, and others cannot be changed at all.
 - New deltas aren't created, which means that you cannot animate a prop that's standing still.
 
-Note that changes to entity properties are only applied to the buffer, and are _not_ reflected by the parser. To check if a value has been changed successfully, you'll have to parse the demo a second time. This is intentional, as otherwise you'd have to keep track of deltas to make relative changes.
+To check if a value has been modified successfully, read the return value of the setter function. If `true`, the property was found and the value was set. Even then, it still might not be entirely accurate to your input due to the limitations above.
+
+Note that changes to entity properties are only applied to the buffer, and are _not_ reflected by the parser. To see the factual value of a property after a change, you'll have to parse the demo a second time. This is intentional, as otherwise you'd have to manually keep track of deltas to make relative changes.
 
 Here's an example that rotates every entity 45 degrees on the roll axis:
 ```js

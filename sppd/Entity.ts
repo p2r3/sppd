@@ -706,17 +706,20 @@ export class Entity {
     return property.value;
   }
 
-  SetProperty (name: string, value: EntityPropertyValueType): void {
+  SetProperty (name: string, value: EntityPropertyValueType): boolean {
     const property = this.properties.find(p => p &&
       p.property.name === name
     );
     if (!property) {
-      throw `Property "${name}" does not exist on entity ${this.index}.`;
+      console.warn(`Property "${name}" does not exist on entity ${this.index}.`);
+      return false;
     }
     if (!this.source) {
-      throw `Cannot write properties of artificial entity ${this.index}.`;
+      console.warn(`Cannot write properties of artificial entity ${this.index}.`);
+      return false;
     }
     property.setValue(this.source, value);
+    return true;
   }
 
   GetOrigin (): Vector {
@@ -742,15 +745,15 @@ export class Entity {
     return origin.Add(cellPosition).Add(parentOrigin);
   }
 
-  SetAbsOrigin (origin: Vector): void {
-    if (!this.source) return;
+  SetAbsOrigin (origin: Vector): boolean {
+    if (!this.source) return false;
     const properties = new Map(this.properties
       .filter(p => p)
       .map(p => [p.property.name, p])
     );
 
     const vecOrigin = properties.get("m_vecOrigin");
-    if (!vecOrigin) return;
+    if (!vecOrigin) return false;
 
     const cellX = properties.get("m_cellX");
     const cellY = properties.get("m_cellY");
@@ -762,12 +765,13 @@ export class Entity {
     cellX?.setValue(this.source, Math.floor(origin.x / 32) + 512);
     cellY?.setValue(this.source, Math.floor(origin.y / 32) + 512);
     cellZ?.setValue(this.source, Math.floor(origin.z / 32) + 512);
+    return true;
   }
 
-  SetOrigin (origin: Vector): void {
+  SetOrigin (origin: Vector): boolean {
     const parent = this.GetMoveParent();
     const parentOrigin = parent ? parent.GetOrigin() : new Vector();
-    this.SetAbsOrigin(origin.Add(parentOrigin));
+    return this.SetAbsOrigin(origin.Add(parentOrigin));
   }
 
   GetAngles (): Vector {
@@ -783,8 +787,8 @@ export class Entity {
     return new Vector(pitch, yaw);
   }
 
-  SetAngles (pitch: number, yaw: number, roll: number): void {
-    if (!this.source) return;
+  SetAngles (pitch: number, yaw: number, roll: number): boolean {
+    if (!this.source) return false;
     const properties = new Map(this.properties
       .filter(p => p)
       .map(p => [p.property.name, p])
@@ -798,6 +802,8 @@ export class Entity {
     angRotation?.setValue(this.source, angles);
     eyePitch?.setValue(this.source, angles.x);
     eyeYaw?.setValue(this.source, angles.y);
+
+    return !!(angRotation || eyePitch || eyeYaw)
   }
 
   GetVelocity (): Vector {
