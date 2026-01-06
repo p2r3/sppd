@@ -6,13 +6,34 @@ import { StringTable } from "./StringTable.ts";
 import { DataTable, ServerClass, ParserClass } from "./DataTable.ts";
 
 export class Message {
+
   public tick: number;
   public slot: number;
   constructor (tick: number, slot: number) {
     this.tick = tick;
     this.slot = slot;
   }
+
   static MSSC: number = 2;
+
+  static fromDemo (demo: Demo): Message {
+    const type = demo.buf.nextByte();
+    const tick = demo.buf.nextInt(32);
+    const slot = demo.buf.nextByte();
+    switch (type) {
+      case 1: return new SignOnMessage(tick, slot, demo);
+      case 2: return new PacketMessage(tick, slot, demo);
+      case 3: return new SyncTickMessage(tick, slot);
+      case 4: return new ConsoleCmdMessage(tick, slot, demo);
+      case 5: return new UserCmdMessage(tick, slot, demo);
+      case 6: return new DataTablesMessage(tick, slot, demo);
+      case 7: return new StopMessage(tick, slot);
+      case 8: return new CustomDataMessage(tick, slot, demo);
+      case 9: return new StringTablesMessage(tick, slot, demo);
+      default: throw `Unknown message type: ${type}`;
+    }
+  }
+
 }
 
 export class CmdInfo {
