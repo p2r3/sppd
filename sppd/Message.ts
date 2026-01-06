@@ -142,14 +142,24 @@ export class StopMessage extends Message {
 
 export class CustomDataMessage extends Message {
 
-  public int: number;
-  public data: Uint8Array;
+  public callbackIndex: number;
+  public cursor?: Vector;
+  public data?: Uint8Array;
 
   constructor (tick: number, slot: number, demo: Demo) {
     super(tick, slot);
 
-    this.int = demo.buf.nextInt(32);
+    this.callbackIndex = demo.buf.nextInt(32);
     const dataLength = demo.buf.nextInt(32) * 8;
+
+    if (this.callbackIndex === 0 && dataLength === 64) {
+      this.cursor = new Vector(
+        demo.buf.nextSignedInt(32),
+        demo.buf.nextSignedInt(32)
+      );
+      return;
+    }
+
     this.data = demo.buf.nextBytes(dataLength);
   }
 
