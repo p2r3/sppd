@@ -40,7 +40,7 @@ export class PlayerInfo extends StringTableEntry {
   public filesDownloaded: number;
   constructor (tableName: string, entryName: string, demo: Demo, compression?: number | null) {
     super(tableName, entryName);
-    const steamIDBuffer = demo.buf.nextBytes(64).reverse().buffer;
+    const steamIDBuffer = demo.buf.nextBytes(64).buffer;
     this.steamID = new DataView(steamIDBuffer).getBigUint64(0);
     this.userID = demo.buf.nextInt(32);
     this.GUID = demo.buf.nextTrimmedString(33);
