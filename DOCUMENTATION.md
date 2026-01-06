@@ -1,6 +1,6 @@
-## SPPD Documentation
+# SPPD Documentation
 
-### Prerequisites
+## Prerequisites
 
 At minimum, SPPD requires just one import:
 ```ts
@@ -17,7 +17,7 @@ This vector implementation, just like the entity interface, should look and feel
 - `Scale (factor: number)` - multiplication;
 - `Clone ()` - deep cloning.
 
-### The `Demo` class
+## The `Demo` class
 
 The `Demo` constructor takes two arguments:
   - a `Uint8Array` with the demo file;
@@ -62,13 +62,13 @@ Here's a rough map of the `Demo` object:
 
 Surface-level information can be gathered from the header, or by looking through the `messages`. However, for more interactive demo analysis, you'll probably want to use `state.entities` from within the `onTick` event handler to interact with in-game objects.
 
-### Entity interface
+## Entity interface
 
 The entity interface is designed to mimick Portal 2's VScript as closely as possible. Because of this, the [VDC "List of Portal 2 Script Functions"](https://developer.valvesoftware.com/wiki/Portal_2/Scripting/Script_Functions) works as a complimentary documentation to this one.
 
 Below are a few examples to help you get a feel for what it's like to work with this system. Again, if you've used VScript before, this should feel familiar.
 
-#### Reading properties
+### Reading properties
 
 Printing the positions and angles of all cubes on every tick:
 ```js
@@ -115,7 +115,7 @@ And to retrieve a `Map` of all available properties and their values:
   entity.GetProperties(); // Returns Map<name, value>
 ```
 
-#### Modifying properties
+### Modifying properties
 
 This parser also lets you _modify_ properties to an extent, effectively letting you edit a demo after it has been recorded. This feature is still very primitive and thus comes with some limitations, namely:
 - Some properties have a fixed range or reduced precision, and others cannot be changed at all.
@@ -182,7 +182,7 @@ entities.FindByClassnameAll("prop_weighted_cube").forEach(cube => {
 });
 ```
 
-#### Miscellaneous quirks
+### Miscellaneous quirks
 
 - The `entities` object can also be accessed like a regular array. It contains all entities, indexed by their entindex:
 ```js
@@ -196,7 +196,7 @@ entities.FindByClassnameAll("prop_weighted_cube").forEach(cube => {
 ```
 - `GetClassname` may return the _server_ class name (e.g. CBaseViewModel) when the prettier "signifier name" is not available. Consequently, searching by classname with `FindByClassname` or similar will include results for matching server class names.
 
-### Messages
+## Messages
 
 Demo messages are available via the `demo.messages` array. Net/Svc messages are stored within their respective Packet/SignOn messages.
 
