@@ -17,14 +17,21 @@ This vector implementation, just like the entity interface, should look and feel
 - `Scale (factor: number)` - multiplication;
 - `Clone ()` - deep cloning.
 
-To load a demo, pass a `Uint8Array` with the demo file into the `Demo` constructor:
+### The `Demo` class
+
+The `Demo` constructor takes two arguments:
+  - a `Uint8Array` with the demo file;
+  - an object of optional event handlers, listed in the example below:
 ```ts
 const demoBytes: Uint8Array = readFileSync("path/to/demo.dem");
-const demo: Demo = new Demo(demoBytes, (demo) => {
-  // ... called once per tick
+const demo: Demo = new Demo(demoBytes, {
+  // Called once per server tick
+  onTick: (demo: Demo): void => { },
+  // Called on every console command
+  onCommand: (demo: Demo, command: string): void => { }
 });
 ```
-The callback function gets called once per simulated server tick. You can still access the demo after parsing has finished to retrieve the final state.
+Parsing starts and ends with the constructor, so accessing the object outside of any event handlers will yield its final state.
 
 Here's a rough map of the `Demo` object:
 - Header:
@@ -53,7 +60,7 @@ Here's a rough map of the `Demo` object:
   - `parserClasses: ParserClass[]`
   - `baselines: EntityBaseLine[]`
 
-Surface-level information can be gathered from the header, or by looking through the `messages`. However, for more interactive demo analysis, you'll probably want to use `state.entities` to interact with in-game objects.
+Surface-level information can be gathered from the header, or by looking through the `messages`. However, for more interactive demo analysis, you'll probably want to use `state.entities` from within the `onTick` event handler to interact with in-game objects.
 
 ### Entity interface
 
@@ -65,7 +72,7 @@ Below are a few examples to help you get a feel for what it's like to work with 
 
 Printing the positions and angles of all cubes on every tick:
 ```js
-new Demo(demoBytes, (demo) => {
+new Demo(demoBytes, { onTick: (demo) => {
   // Ensure that entities have loaded
   const { entities } = demo.state;
   if (!entities) return;
@@ -79,12 +86,12 @@ new Demo(demoBytes, (demo) => {
     console.log(pos + " " + ang);
   }
 
-});
+}});
 ```
 
 Logging the position of the blue portal starting from tick 1000:
 ```js
-new Demo(demoBytes, (demo) => {
+new Demo(demoBytes, { onTick: (demo) => {
   // Don't do anything until tick 1000
   if (demo.state.tick < 1000) return;
 
@@ -96,7 +103,7 @@ new Demo(demoBytes, (demo) => {
   const portal = entities.FindByModel(null, "models/portals/portal1.mdl");
   if (portal) console.log(portal.GetOrigin().toString());
 
-});
+}});
 ```
 
 You can also read arbitrary properties like so:
@@ -120,7 +127,7 @@ Note that changes to entity properties are only applied to the buffer, and are _
 
 Here's an example that rotates every entity 45 degrees on the roll axis:
 ```js
-const demo = new Demo(demoBytes, (demo) => {
+const demo = new Demo(demoBytes, { onTick: (demo) => {
   // Ensure that entities have loaded
   const { entities } = demo.state;
   if (!entities) return;
@@ -136,7 +143,7 @@ const demo = new Demo(demoBytes, (demo) => {
     ent.GetAngles().z === 45;
   }
 
-});
+}});
 
 // Get the modified demo buffer
 const u8array = demo.buf.bytes;
@@ -146,7 +153,7 @@ fs.writeFileSync("output.dem", u8array);
 
 Resizing floor buttons to Pi times their original size:
 ```js
-const demo = new Demo(demoBytes, (demo) => {
+const demo = new Demo(demoBytes, { onTick: (demo) => {
   // Ensure that entities have loaded
   const { entities } = demo.state;
   if (!entities) return;
@@ -161,7 +168,7 @@ const demo = new Demo(demoBytes, (demo) => {
     ent.SetProperty("m_flModelScale", Math.PI);
   }
 
-});
+}});
 
 fs.writeFileSync("output.dem", demo.buf.bytes);
 ```

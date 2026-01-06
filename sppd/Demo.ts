@@ -1,8 +1,17 @@
 import { DemoBuffer } from "./DemoBuffer.ts";
-import { Message, StopMessage, CmdInfo } from "./Message.ts";
 import { DataTable, ServerClass, ParserClass } from "./DataTable.ts";
 import { Entities, EntityBaseLine } from "./Entity.ts";
 import { StringTable } from "./StringTable.ts";
+import {
+  Message,
+  ConsoleCmdMessage,
+  PacketMessage,
+  StopMessage,
+  CmdInfo
+} from "./Message.ts";
+import {
+  NetSetConVar
+} from "./NetSvcMessage.ts"
 
 class DemoState {
   public tick: number = 0;
@@ -35,7 +44,13 @@ export class Demo {
   public parserClasses: ParserClass[] | null = null;
   public baselines: EntityBaseLine[] = [];
 
-  constructor (bytes: Uint8Array, callback?: (demo: Demo) => void) {
+  constructor (
+    bytes: Uint8Array,
+    events: {
+      onTick?: (demo: Demo) => void,
+      onCommand?: (demo: Demo, command: string) => void
+    }
+  ) {
     this.buf = new DemoBuffer(bytes);
 
     this.demoFileStamp = this.buf.nextTrimmedString(8 * 8);
@@ -61,11 +76,22 @@ export class Demo {
       this.messages.push(message);
 
       if (lastTick !== this.state.tick) {
-        if (callback) callback(this);
+        if (events.onTick) events.onTick(this);
         lastTick = this.state.tick;
       }
 
       if (message instanceof StopMessage) break;
+
+      if (!events.onCommand) continue;
+      if (message instanceof ConsoleCmdMessage) {
+        events.onCommand(this, message.command);
+      } else if (message instanceof PacketMessage) {
+        const convarMessage = message.messages.find(m => m instanceof NetSetConVar);
+        if (!convarMessage) continue;
+        for (const { name, value } of convarMessage.convars) {
+          events.onCommand(this, name + " " + value);
+        }
+      }
 
     }
 

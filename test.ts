@@ -13,9 +13,8 @@ if (!existsSync(demoFilePath)) {
   process.exit(1);
 }
 
-const demoBytes: Uint8Array = readFileSync(demoFilePath);
-const demo: Demo = new Demo(demoBytes, (demo) => {
-  // Called once per server tick (30 TPS in SP)
+// Called once per server tick (30 TPS in SP)
+const tickHandler = (demo: Demo): void => {
 
   // Check if entities have loaded yet
   const { entities } = demo.state;
@@ -25,6 +24,24 @@ const demo: Demo = new Demo(demoBytes, (demo) => {
   const cube = entities.FindByClassname(null, "prop_weighted_cube");
   if (cube) console.log(cube.GetOrigin()?.ToKVString());
 
+};
+
+let jumps: number = 0;
+const commandHandler = (demo: Demo, command: string): void => {
+
+  // Count "+jump" commands
+  if (command.startsWith("+jump")) {
+    jumps ++;
+  }
+
+};
+
+const demoBytes: Uint8Array = readFileSync(demoFilePath);
+const demo: Demo = new Demo(demoBytes, {
+  onTick: tickHandler,
+  onCommand: commandHandler
 });
+
+console.log(jumps, "jumps");
 
 // Do something with `demo` after parsing...

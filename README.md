@@ -6,7 +6,7 @@ This parser enables you to interact with a demo as it's being parsed. In other w
 Here's a simple example that logs the position of a cube over time:
 ```ts
 const demoBytes: Uint8Array = readFileSync(demoFilePath);
-const demo: Demo = new Demo(demoBytes, (demo) => {
+const demo: Demo = new Demo(demoBytes, { onTick: (demo) => {
   // Called once per server tick (30 TPS in SP)
 
   // Check if entities have loaded yet
@@ -17,7 +17,7 @@ const demo: Demo = new Demo(demoBytes, (demo) => {
   const cube = entities.FindByClassname(null, "prop_weighted_cube");
   if (cube) console.log(cube.GetOrigin()?.ToKVString());
 
-});
+}});
 ```
 The entity interface is deliberately shaped like the VScript API to make it more familiar to those who've scripted for Portal 2 before. For more details, see the [documentation](DOCUMENTATION.md).
 
