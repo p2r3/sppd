@@ -44,14 +44,14 @@ Here's a rough map of the `Demo` object:
   - `state: DemoState`
     - `tick: number`
     - `players: CmdInfo[]`
-    - `dataTables: DataTable[]`
-    - `stringTables: Map<string, StringTable>`
-    - `serverClasses: ServerClass[]`
-    - `parserClasses: ParserClass[]`
-    - `baselines: EntityBaseLine[]`
     - `entities: Entities`
 - Internal data:
   - `buf: DemoBuffer`
+  - `dataTables: DataTable[]`
+  - `stringTables: Map<string, StringTable>`
+  - `serverClasses: ServerClass[]`
+  - `parserClasses: ParserClass[]`
+  - `baselines: EntityBaseLine[]`
 
 Surface-level information can be gathered from the header, or by looking through the `messages`. However, for more interactive demo analysis, you'll probably want to use `state.entities` to interact with in-game objects.
 
