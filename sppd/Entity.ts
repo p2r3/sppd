@@ -938,6 +938,14 @@ export class Entity {
     return this.index;
   }
 
+  IsNoclipping (): boolean {
+    const className = this.serverClass.className;
+    if (className !== "CPortal_Player") {
+      throw `Method IsNoclipping does not exist on ${className}.`;
+    }
+    return this.GetProperty("movetype") === 8;
+  }
+
 }
 
 // Imitation of VScript `Entities` global, also acts as an array
