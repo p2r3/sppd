@@ -19,7 +19,7 @@ const demo: Demo = new Demo(demoBytes, { onTick: (demo) => {
 
 }});
 ```
-The entity interface is deliberately shaped like the VScript API to make it more familiar to those who've scripted for Portal 2 before. For more details, see the [documentation](DOCUMENTATION.md).
+The entity interface is deliberately shaped like the VScript API to make it more familiar to those who've scripted for Portal 2 before. For more details, see the [examples](EXAMPLES.md).
 
 ## Acknowledgements
 - [**UntitledParser**](https://github.com/UncraftedName/UntitledParser) - most of the entity handling code is derived from here.
