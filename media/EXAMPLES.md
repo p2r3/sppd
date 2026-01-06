@@ -1,6 +1,6 @@
 # SPPD Examples
 
-This document aims to familiarize the reader with SPPD, what it is, and what it can do. This is _not_ an exhaustive API documentation, but rather a collection of general explanations and practical examples.
+This document aims to familiarize the reader with SPPD, what it is, and what it can do. This is _not_ an exhaustive [API documentation](https://p2r3.github.io/sppd), but rather a collection of general explanations and practical examples.
 
 ## Prerequisites
 
