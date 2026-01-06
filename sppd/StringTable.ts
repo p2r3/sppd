@@ -148,7 +148,7 @@ export class StringTable {
 
     let table = demo.stringTables.get(tableName);
     if (!table) {
-      console.warn("Got StringTables message before SvcCreateStringTable.");
+      console.warn(`Got StringTables message for "${tableName}" before SvcCreateStringTable.`);
       table = new StringTable(tableName);
     }
 
