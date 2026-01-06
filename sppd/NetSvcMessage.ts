@@ -389,16 +389,17 @@ export class SvcVoiceInit extends NetSvcMessage {
 export class SvcVoiceData extends NetSvcMessage {
   public client: number;
   public proximity: number;
-  public audible: boolean[] = [];
+  public audible: boolean[];
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
     this.client = demo.buf.nextByte();
     this.proximity = demo.buf.nextByte();
     const length = demo.buf.nextInt(16);
-    for (let i = 0; i < Message.MSSC; i ++) {
-      this.audible.push(!!demo.buf.nextBit());
-    }
+    this.audible = [
+      !!demo.buf.nextBit(),
+      !!demo.buf.nextBit()
+    ];
     this.data = demo.buf.nextBytes(length);
   }
 }

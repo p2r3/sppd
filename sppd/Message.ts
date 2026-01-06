@@ -14,8 +14,6 @@ export class Message {
     this.slot = slot;
   }
 
-  static MSSC: number = 2;
-
   static fromDemo (demo: Demo): Message {
     const type = demo.buf.nextByte();
     const tick = demo.buf.nextInt(32);
@@ -65,7 +63,7 @@ export class PacketMessage extends Message {
   constructor (tick: number, slot: number, demo: Demo) {
     super(tick, slot);
 
-    for (let i = 0; i < Message.MSSC; i ++) {
+    for (let i = 0; i < 2; i ++) {
       const info = new CmdInfo(demo.buf);
       this.packetInfo.push(info);
     }
