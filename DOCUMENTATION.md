@@ -231,3 +231,22 @@ for (const message of demo.messages) {
   }
 }
 ```
+
+## Console commands
+
+Console commands have a dedicated `onCommand` event that gets fired whenever a client executes a console command or sets a console variable, or when the server executes commands on the client's behalf.
+
+Here's an example that counts the amount of "+jump" inputs without filtering the raw messages:
+```js
+let jumps = 0;
+new Demo(demoBytes, { onCommand: (demo, command) => {
+
+  // Increment `jumps` for each "+jump" command. We use `startsWith` because
+  // bound action inputs are usually followed by a key identifier.
+  if (command.startsWith("+jump")) {
+    jumps ++;
+  }
+
+}});
+console.log(jumps);
+```
