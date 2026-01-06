@@ -7,11 +7,6 @@ import { StringTable } from "./StringTable.ts";
 class DemoState {
   public tick: number = 0;
   public players: CmdInfo[] = [];
-  public dataTables: DataTable[] | null = null;
-  public stringTables: Map<string, StringTable> = new Map();
-  public serverClasses: ServerClass[] | null = null;
-  public parserClasses: ParserClass[] | null = null;
-  public baselines: EntityBaseLine[] = [];
   public entities: Entities | null = null;
 }
 
@@ -34,6 +29,11 @@ export class Demo {
   public state: DemoState;
   // Internal
   public buf: DemoBuffer;
+  public dataTables: DataTable[] | null = null;
+  public stringTables: Map<string, StringTable> = new Map();
+  public serverClasses: ServerClass[] | null = null;
+  public parserClasses: ParserClass[] | null = null;
+  public baselines: EntityBaseLine[] = [];
 
   constructor (bytes: Uint8Array, callback?: (demo: Demo) => void) {
     this.buf = new DemoBuffer(bytes);

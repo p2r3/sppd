@@ -259,10 +259,10 @@ export class SvcCreateStringTable extends NetSvcMessage {
     this.flags = demo.buf.nextInt(2);
     const dataEnd = demo.buf.cursor + dataLength;
 
-    let table = demo.state.stringTables.get(this.name);
+    let table = demo.stringTables.get(this.name);
     if (!table) {
       table = new StringTable(this.name);
-      demo.state.stringTables.set(this.name, table);
+      demo.stringTables.set(this.name, table);
     }
 
     table.maxEntries = this.maxEntries;
@@ -285,7 +285,7 @@ export class SvcUpdateStringTable extends NetSvcMessage {
     const dataLength = demo.buf.nextInt(20);
     const dataEnd = demo.buf.cursor + dataLength;
 
-    const table = Array.from(demo.state.stringTables.values())[this.tableID];
+    const table = Array.from(demo.stringTables.values())[this.tableID];
     if (!table) {
       console.warn("Tried to update non-existent string table.");
       demo.buf.cursor = dataEnd;
@@ -549,7 +549,7 @@ export class SvcPacketEntities extends NetSvcMessage {
     this.updateBaseline = !!demo.buf.nextBit();
     const dataEnd = demo.buf.cursor + dataLength;
 
-    if (!demo.state.dataTables || !demo.state.serverClasses || !demo.state.parserClasses) {
+    if (!demo.dataTables || !demo.serverClasses || !demo.parserClasses) {
       console.warn("Tried to parse SvcPacketEntities before DataTables.");
       demo.buf.cursor = dataEnd;
       return;
@@ -590,7 +590,7 @@ export class SvcPacketEntities extends NetSvcMessage {
             return;
           }
           const tableID = entity.serverClass.tableID;
-          const parserClass = demo.state.parserClasses[tableID];
+          const parserClass = demo.parserClasses[tableID];
           if (!parserClass) {
             console.warn(`Missing parser class for entity "${entity.serverClass.className}".`);
             demo.buf.cursor = dataEnd;
@@ -605,10 +605,10 @@ export class SvcPacketEntities extends NetSvcMessage {
 
         case 2: // Enter PVS
         {
-          const idBits = DemoBuffer.highestBitIndex(demo.state.serverClasses.length) + 1;
+          const idBits = DemoBuffer.highestBitIndex(demo.serverClasses.length) + 1;
           const tableID = demo.buf.nextInt(idBits);
           const serial = demo.buf.nextInt(10);
-          const parserClass = demo.state.parserClasses[tableID];
+          const parserClass = demo.parserClasses[tableID];
           if (!parserClass) {
             console.warn(`Missing parser class for new entity, serial ${serial}.`);
             demo.buf.cursor = dataEnd;

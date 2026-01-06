@@ -71,17 +71,17 @@ export class InstanceBaseLine extends StringTableEntry {
   constructor (tableName: string, entryName: string, demo: Demo, compression?: number | null) {
     super(tableName, entryName);
 
-    if (demo.state.parserClasses === null) {
+    if (demo.parserClasses === null) {
       console.warn("Received InstanceBaseLine before DataTables.");
       return;
     }
 
     const index = parseInt(entryName);
-    if (isNaN(index) || index < 0 || index >= demo.state.parserClasses.length) {
+    if (isNaN(index) || index < 0 || index >= demo.parserClasses.length) {
       throw `Name "${entryName}" is not a valid server class index.`;
     }
 
-    const parserClass = demo.state.parserClasses[index];
+    const parserClass = demo.parserClasses[index];
     if (!parserClass) {
       throw `Could not find parsed entity class at index ${index}.`;
     }
@@ -146,7 +146,7 @@ export class StringTable {
   static fromDemo (demo: Demo) {
     const tableName = demo.buf.nextNullTerminatedString();
 
-    let table = demo.state.stringTables.get(tableName);
+    let table = demo.stringTables.get(tableName);
     if (!table) {
       console.warn("Got StringTables message before SvcCreateStringTable.");
       table = new StringTable(tableName);

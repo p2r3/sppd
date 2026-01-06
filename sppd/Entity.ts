@@ -498,10 +498,10 @@ export class EntityBaseLine {
     flatPropertyCount: number
   ) {
     const id = serverClass.tableID;
-    if (!demo.state.baselines[id]) {
-      demo.state.baselines[id] = new EntityBaseLine(serverClass, new Array(flatPropertyCount));
+    if (!demo.baselines[id]) {
+      demo.baselines[id] = new EntityBaseLine(serverClass, new Array(flatPropertyCount));
     }
-    const baseLine = demo.state.baselines[id];
+    const baseLine = demo.baselines[id];
 
     for (const from of entityProperties) {
       if (!from) continue;
@@ -594,11 +594,11 @@ export class Entity {
   static fromBaseLine (demo: Demo, serverClass: ServerClass, serial: number, index: number): Entity {
 
     const tableID = serverClass.tableID;
-    let baseline = demo.state.baselines[tableID];
+    let baseline = demo.baselines[tableID];
     if (!baseline) {
       console.warn(`Missing baseline for "${serverClass.className}", creating blank.`);
       baseline = new EntityBaseLine(serverClass, []);
-      demo.state.baselines[tableID] = baseline;
+      demo.baselines[tableID] = baseline;
     }
 
     const entityProperties = baseline.entityProperties;
@@ -617,7 +617,7 @@ export class Entity {
   }
 
   static enterPVS (demo: Demo, update: EntityEnterPVS, updateBaseline: boolean): void {
-    if (demo.state.baselines.length === 0) {
+    if (demo.baselines.length === 0) {
       throw "Tried to parse entity update without baselines.";
     }
     if (!demo.state.entities) {
@@ -844,7 +844,7 @@ export class Entity {
     return classname;
   }
   GetModelName (): string {
-    const models = this.source?.state.stringTables?.get("modelprecache");
+    const models = this.source?.stringTables?.get("modelprecache");
     if (!models) return "";
     const modelIndex = this.GetProperty("m_nModelIndex");
     if (typeof modelIndex !== "number") return "";
@@ -855,7 +855,7 @@ export class Entity {
   SetModel (model: string): boolean {
     if (!this.source) return false;
     const normalizedModel = model.replaceAll("\\", "/");
-    const models = this.source?.state.stringTables?.get("modelprecache");
+    const models = this.source?.stringTables?.get("modelprecache");
     if (!models) return false;
     const modelIndex = models.entries.findIndex(m =>
       m.entryName.replaceAll("\\", "/") === normalizedModel

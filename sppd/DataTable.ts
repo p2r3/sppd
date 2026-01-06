@@ -163,15 +163,15 @@ export class ParserClass {
     const parsedTable: ParserClass[] = [];
 
     if (
-      demo.state.dataTables === null
-      || demo.state.serverClasses === null
+      demo.dataTables === null
+      || demo.serverClasses === null
     ) {
       throw "Tried to parse DataTables before they were received.";
     }
 
-    for (const serverClass of demo.state.serverClasses) {
+    for (const serverClass of demo.serverClasses) {
       const tableID = serverClass.tableID;
-      const table = demo.state.dataTables[tableID];
+      const table = demo.dataTables[tableID];
       if (!table) {
         console.warn(`Missing DataTable of server class "${serverClass.className}".`);
         continue;
@@ -192,14 +192,14 @@ export class ParserClass {
   static gatherExcludes (demo: Demo, table: DataTable): ExcludePairSet {
     const excludes = new ExcludePairSet();
 
-    if (demo.state.dataTables === null) {
+    if (demo.dataTables === null) {
       throw "Tried to parse DataTables before they were received.";
     }
 
     for (const property of table.properties) {
       if (typeof property.excludeName === "undefined") continue;
       if (property.type === DataTablePropertyType.DataTable) {
-        const excludeTable = demo.state.dataTables.find(c => c.name === property.excludeName);
+        const excludeTable = demo.dataTables.find(c => c.name === property.excludeName);
         if (!excludeTable) {
           console.warn(`Missing excluded table "${property.excludeName}" for table "${table.name}"`);
           continue;
@@ -246,7 +246,7 @@ export class ParserClass {
     flatProperties: FlatProperty[],
     prefix: string
   ): void {
-    if (demo.state.dataTables === null) {
+    if (demo.dataTables === null) {
       throw "Tried to parse DataTables before they were received.";
     }
 
@@ -262,7 +262,7 @@ export class ParserClass {
 
       if (property.type === DataTablePropertyType.DataTable) {
 
-        const excludeTable = demo.state.dataTables.find(c => c.name === property.excludeName);
+        const excludeTable = demo.dataTables.find(c => c.name === property.excludeName);
         if (!excludeTable) {
           console.warn(`Missing excluded table "${property.excludeName}" for table "${table.name}".`);
           continue;

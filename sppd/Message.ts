@@ -125,10 +125,10 @@ export class DataTablesMessage extends Message {
     }
     demo.buf.cursor = dataEnd;
 
-    demo.state.dataTables = this.dataTables;
-    demo.state.serverClasses = this.serverClasses;
+    demo.dataTables = this.dataTables;
+    demo.serverClasses = this.serverClasses;
 
-    demo.state.parserClasses = ParserClass.fromDemo(demo);
+    demo.parserClasses = ParserClass.fromDemo(demo);
 
   }
 
@@ -169,7 +169,7 @@ export class StringTablesMessage extends Message {
     for (let i = 0; i < tableCount; i ++) {
       const table = StringTable.fromDemo(demo);
       this.tables.push(table);
-      demo.state.stringTables.set(table.name, table);
+      demo.stringTables.set(table.name, table);
     }
 
     demo.buf.cursor = dataEnd;
