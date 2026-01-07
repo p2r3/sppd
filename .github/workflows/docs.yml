@@ -28,7 +28,7 @@ jobs:
         run: bun i --global typedoc
 
       - name: Run TypeDoc
-        run: typedoc --entryPointStrategy Expand sppd
+        run: typedoc --sort source-order --entryPointStrategy Expand sppd --name "Scriptable Parser for Portal 2 Demos"
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4

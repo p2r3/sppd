@@ -52,3 +52,6 @@ _test.js
 
 # testing stdout
 *.log
+
+# typedoc (only supposed to be on gh-pages branch)
+docs
