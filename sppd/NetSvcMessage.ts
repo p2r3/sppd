@@ -485,14 +485,11 @@ export class SvcBspDecal extends NetSvcMessage { // TODO: Full implementation
 }
 
 export class SvcSplitScreen extends NetSvcMessage {
-  public removePlayer: boolean;
   public data: Uint8Array;
   constructor (demo: Demo) {
     super();
-    this.removePlayer = !!demo.buf.nextBit();
-    const length = demo.buf.nextInt(11);
-    this.data = demo.buf.nextBytes(length);
-    demo.buf.nextBytes(8 - length % 8); // ???
+    // Seems to always be 0101000000000
+    this.data = demo.buf.nextBytes(13);
   }
 }
 
