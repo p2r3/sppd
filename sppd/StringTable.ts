@@ -30,6 +30,7 @@ export class StringTableEntry {
 
 export class PlayerInfo extends StringTableEntry {
   public steamID: BigInt;
+  public name: string;
   public userID: number;
   public GUID: string;
   public friendsID: number;
@@ -42,14 +43,15 @@ export class PlayerInfo extends StringTableEntry {
     super(tableName, entryName);
     const steamIDBuffer = demo.buf.nextBytes(64).buffer;
     this.steamID = new DataView(steamIDBuffer).getBigUint64(0);
-    this.userID = demo.buf.nextInt(32);
-    this.GUID = demo.buf.nextTrimmedString(33);
-    demo.buf.nextInt(3);
+    this.name = demo.buf.nextTrimmedString(32 * 8);
+    this.userID = demo.buf.nextSignedInt(32);
+    this.GUID = demo.buf.nextTrimmedString(33 * 8);
+    demo.buf.nextInt(3 * 8); // C struct byte alignment
     this.friendsID = demo.buf.nextInt(32);
-    this.friendsName = demo.buf.nextTrimmedString(33);
-    this.fakePlayer = !!demo.buf.nextBit();
-    this.isHLTV = !!demo.buf.nextBit();
-    demo.buf.nextInt(2);
+    this.friendsName = demo.buf.nextTrimmedString(32 * 8);
+    this.fakePlayer = !!demo.buf.nextByte();
+    this.isHLTV = !!demo.buf.nextByte();
+    demo.buf.nextInt(2 * 8); // C struct byte alignment
     this.customFilesCRC = [];
     for (let i = 0; i < 4; i ++) {
       this.customFilesCRC.push(demo.buf.nextInt(32));
