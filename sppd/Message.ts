@@ -198,42 +198,6 @@ export class ConsoleCmdMessage extends Message {
 
 }
 
-export class UserCmdInfo {
-  number?: number;
-  tickCount?: number;
-  viewAnglesX?: number;
-  viewAnglesY?: number;
-  viewAnglesZ?: number;
-  forwardMove?: number;
-  sideMove?: number;
-  upMove?: number;
-  buttons?: number;
-  impulse?: number;
-  weaponSelect?: number;
-  weaponSubtype?: number;
-  mouseDeltaX?: number
-  mouseDeltaY?: number
-  constructor (dbuffer: DemoBuffer) {
-    if (dbuffer.nextBit()) this.number = dbuffer.nextInt(32);
-    if (dbuffer.nextBit()) this.tickCount = dbuffer.nextInt(32);
-    if (dbuffer.nextBit()) this.viewAnglesX = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.viewAnglesY = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.viewAnglesZ = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.forwardMove = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.sideMove = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.upMove = dbuffer.nextFloat();
-    if (dbuffer.nextBit()) this.buttons = dbuffer.nextInt(32);
-    if (dbuffer.nextBit()) this.impulse = dbuffer.nextByte();
-    if (dbuffer.nextBit()) {
-      this.weaponSelect = dbuffer.nextInt(11);
-      if (dbuffer.nextBit()) {
-        this.weaponSubtype = dbuffer.nextInt(6);
-      }
-    }
-    if (dbuffer.nextBit()) this.mouseDeltaX = dbuffer.nextInt(16);
-    if (dbuffer.nextBit()) this.mouseDeltaY = dbuffer.nextInt(16);
-  }
-}
 export class UserCmdMessage extends Message {
 
   public commandNumber: number;
