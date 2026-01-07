@@ -19,7 +19,7 @@ This vector implementation, just like the entity interface, should look and feel
 - `Scale (factor: number)` - multiplication;
 - `Clone ()` - deep cloning.
 
-## The `Demo` class
+## The Demo class
 
 The `Demo` constructor takes two arguments:
   - a `Uint8Array` with the demo file;
