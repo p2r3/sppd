@@ -135,7 +135,7 @@ export class DemoBuffer {
     switch (this.nextInt(2)) {
       case 1: return ret | (this.nextInt(4) << 4);
       case 2: return ret | (this.nextByte() << 4);
-      case 3: return ret | (this.nextInt(28) << 4);
+      case 3: return ret | ((this.nextInt(28) << 4) >>> 0);
     }
     return ret;
   }
