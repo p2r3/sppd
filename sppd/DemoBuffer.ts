@@ -57,9 +57,12 @@ export class DemoBuffer {
     return string;
   }
   getInt (from: number, size: number): number {
-    return this.getBitSlice(from, from + size)
-      .reverse()
-      .reduce((a, c) => (a << 8) + c);
+    const bytes = this.getBitSlice(from, from + size);
+    let output = 0;
+    for (let i = bytes.length - 1; i >= 0; i --) {
+      output = output * 256 + (bytes[i] || 0);
+    }
+    return output;
   }
   getSignedInt (from: number, size: number): number {
     const value = this.getInt(from, size);
