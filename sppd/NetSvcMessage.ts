@@ -492,6 +492,7 @@ export class SvcSplitScreen extends NetSvcMessage {
     this.removePlayer = !!demo.buf.nextBit();
     const length = demo.buf.nextInt(11);
     this.data = demo.buf.nextBytes(length);
+    demo.buf.nextBytes(8 - length % 8); // ???
   }
 }
 
