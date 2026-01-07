@@ -236,20 +236,57 @@ export class UserCmdInfo {
 }
 export class UserCmdMessage extends Message {
 
-  public id: number;
-  public info: UserCmdInfo[] = [];
+  public commandNumber: number;
+  public tickCount: number = 0;
+
+  public viewAngles: Vector = new Vector();
+  public movement: Vector = new Vector();
+  public mouseDelta: Vector = new Vector();
+
+  public buttons: number = 0;
+  public impulse: number = 0;
+
+  public heldEntity: number = 0;
+  public heldEntityPortal: number = 0;
+  public predictedPortalTeleportations: number = 0;
+
+  public weaponSelect: number = 0;
+  public weaponSubtype: number = 0;
+  public pendingAcks: number = 0;
 
   constructor (tick: number, slot: number, demo: Demo) {
     super(tick, slot);
 
-    this.id = demo.buf.nextInt(32);
+    this.commandNumber = demo.buf.nextInt(32);
 
-    const dataLength = demo.buf.nextInt(32) * 8;
+    const dataLength = demo.buf.nextSignedInt(32) * 8;
     const dataEnd = demo.buf.cursor + dataLength;
 
-    while (demo.buf.cursor < dataEnd) {
-      this.info.push(new UserCmdInfo(demo.buf));
+    if (demo.buf.nextBit()) demo.buf.nextInt(32); // Same as commandNumber
+    if (demo.buf.nextBit()) this.tickCount = demo.buf.nextInt(32);
+    if (demo.buf.nextBit()) this.viewAngles.x = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.viewAngles.y = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.viewAngles.z = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.movement.x = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.movement.y = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.movement.z = demo.buf.nextFloat();
+    if (demo.buf.nextBit()) this.buttons = demo.buf.nextInt(32);
+    if (demo.buf.nextBit()) this.impulse = demo.buf.nextByte();
+    if (demo.buf.nextBit()) {
+      this.weaponSelect = demo.buf.nextInt(11);
+      if (this.weaponSelect) console.log(this.weaponSelect);
+      if (demo.buf.nextBit()) {
+        this.weaponSubtype = demo.buf.nextInt(6);
+      }
     }
+    if (demo.buf.nextBit()) this.mouseDelta.x = demo.buf.nextSignedInt(16);
+    if (demo.buf.nextBit()) this.mouseDelta.y = demo.buf.nextSignedInt(16);
+    if (demo.buf.nextBit()) this.heldEntity = demo.buf.nextInt(16);
+    if (demo.buf.nextBit()) this.heldEntityPortal = demo.buf.nextInt(16);
+    if (demo.buf.nextBit()) this.pendingAcks = demo.buf.nextInt(16);
+    if (demo.buf.nextBit()) this.predictedPortalTeleportations = demo.buf.nextByte();
+    if (this.predictedPortalTeleportations) console.log(this.predictedPortalTeleportations);
+
     demo.buf.cursor = dataEnd;
 
   }
