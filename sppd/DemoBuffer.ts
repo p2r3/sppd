@@ -268,17 +268,17 @@ export class DemoBuffer {
     return ret;
   }
   /**
-   * Reads the next index in a sequence of fields using a variable-length
+   * Reads the next index in a sequence of properties using a variable-length
    * encoding, and moves the cursor past it.
    * @param lastIndex Preceding index value, -1 to start an iteration.
-   * @param newWay Whether to use the "new way" of parsing(?)
+   * @param newScheme Whether to use the "new" parsing scheme.
    * Pretty much always true for Portal 2 demos.
    * @returns The next index in the sequence.
    */
-  nextFieldIndex (lastIndex: number, newWay: boolean): number {
-    if (newWay && this.nextBit()) return lastIndex + 1;
+  nextPropertyIndex (lastIndex: number, newScheme: boolean): number {
+    if (newScheme && this.nextBit()) return lastIndex + 1;
     let ret;
-    if (newWay && this.nextBit()) {
+    if (newScheme && this.nextBit()) {
       ret = this.nextInt(3);
     } else {
       ret = this.nextInt(5);

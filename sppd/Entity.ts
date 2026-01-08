@@ -461,9 +461,9 @@ export class EntityProperty {
   static readProperties (demo: Demo, flatProperties: FlatProperty[]): EntityProperty[] {
     const properties: EntityProperty[] = [];
 
-    const newWay = !!demo.buf.nextBit();
+    const newScheme = !!demo.buf.nextBit();
     let i = -1;
-    while ((i = demo.buf.nextFieldIndex(i, newWay)) !== -1) {
+    while ((i = demo.buf.nextPropertyIndex(i, newScheme)) !== -1) {
       if (i < 0 || i >= flatProperties.length) {
         console.warn("Overflowed expected entity property count.");
         return properties;
