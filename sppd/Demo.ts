@@ -96,7 +96,7 @@ export class Demo {
    */
   constructor (
     bytes: Uint8Array,
-    events: {
+    events?: {
       onTick?: (demo: Demo) => void,
       onCommand?: (demo: Demo, command: string) => void
     }
@@ -126,13 +126,13 @@ export class Demo {
       this.messages.push(message);
 
       if (lastTick !== this.state.tick) {
-        if (events.onTick) events.onTick(this);
+        if (events && events.onTick) events.onTick(this);
         lastTick = this.state.tick;
       }
 
       if (message instanceof StopMessage) break;
 
-      if (!events.onCommand) continue;
+      if (!events || !events.onCommand) continue;
       if (message instanceof ConsoleCmdMessage) {
         events.onCommand(this, message.command);
       } else if (message instanceof PacketMessage) {
