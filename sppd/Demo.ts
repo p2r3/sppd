@@ -145,7 +145,10 @@ export class Demo {
           this.messages.push(message);
 
           if (lastTick !== this.state.tick) {
-            if (events && events.onTick) events.onTick(this);
+            if (events && events.onTick) {
+              const success = await events.onTick(this);
+              if (success === false) return resolve(false);
+            }
             lastTick = this.state.tick;
           }
 
