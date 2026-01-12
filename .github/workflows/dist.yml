@@ -30,19 +30,16 @@ jobs:
       - name: Build
         run: tsc -p tsconfig.build.json
 
-      - name: Update GitHub release
+      - name: Archive build output
+        run: zip -r9 sppd_dist.zip dist
+
+      - name: Upload release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: dist
           name: "Latest build"
+          files: sppd_dist.zip
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
