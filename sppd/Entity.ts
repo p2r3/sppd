@@ -802,6 +802,7 @@ export class Entity {
     return localOrigin.RotateVector(parentAngles).Add(parentOrigin);
   }
 
+  // TODO: Handle entities in hierarchy correctly
   SetAbsOrigin (origin: Vector): boolean {
     if (!this.source) return false;
     const properties = new Map(this.properties
