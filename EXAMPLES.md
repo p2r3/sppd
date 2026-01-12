@@ -23,17 +23,47 @@ This vector implementation, just like the entity interface, should look and feel
 
 The `Demo` constructor takes two arguments:
   - a `Uint8Array` with the demo file;
-  - an object of optional event handlers, listed in the example below:
+  - an object of optional event handlers.
+
+Basic header parsing is done immediately after the object is constructed. But for the rest of the data, you'll have to use one of the events to access the demo object at a later stage of parsing.
+
+Below is a minimal example with stubs for all available events. Later examples will dive deeper into the potential uses of each event.
 ```ts
 const demoBytes: Uint8Array = readFileSync("path/to/demo.dem");
 const demo: Demo = new Demo(demoBytes, {
   // Called once per server tick
   onTick: (demo: Demo): void => { },
   // Called on every console command
-  onCommand: (demo: Demo, command: string): void => { }
+  onCommand: (demo: Demo, command: string): void => { },
+  // Called once the demo has finished parsing
+  onFinish: (demo: Demo, success: boolean): void => { }
 });
 ```
-Parsing starts and ends with the constructor, so accessing the object outside of any event handlers will yield its final state.
+
+Most event handlers (aside from `onFinish`) may be asynchronous. In that case, parsing effectively "pauses" until the returned promise resolves. This lets you parse only some part of a demo at a time, doing other calculations between events:
+```js
+// Pause parsing for 1 second on each console command
+new Demo(demoBytes, {
+  onCommand: async (demo, command) => {
+    console.log(command);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+});
+```
+
+Event handlers may also return a boolean indicating whether or not parsing should continue. If an event handler returns `true` (or nothing), the parser will continue as per usual. If an event handler returns `false`, even as part of a promise, the parser will stop immediately and call `onFinish` with a `success` value of `false`:
+```js
+// Parse until the first "+jump" command, then stop
+new Demo(demoBytes, {
+  onCommand: async (demo, command) => {
+    return !command.startsWith("+jump");
+  },
+  onFinish: (demo, success) => {
+    if (success) console.log("Demo contains no jumps.");
+    else console.log(`Found first jump command on tick ${demo.state.tick}.`);
+  }
+});
+```
 
 Here's a rough map of the `Demo` object:
 - Header:
@@ -62,7 +92,7 @@ Here's a rough map of the `Demo` object:
   - `parserClasses: ParserClass[]`
   - `baselines: EntityBaseLine[]`
 
-Surface-level information can be gathered from the header, or by looking through the `messages`. However, for more interactive demo analysis, you'll probably want to use `state.entities` from within the `onTick` event handler to interact with in-game objects.
+Surface-level information can be gathered from the header, or by looking through the `messages` during/after parsing. However, for more interactive demo analysis, you'll probably want to use `state.entities` from within the `onTick` event handler to interact with in-game objects as they move around.
 
 ## Entity interface
 
@@ -207,13 +237,14 @@ Here's an example that counts the amount of times the `+jump` commmand was calle
 import { Demo } from "./sppd/Demo.ts";
 import { ConsoleCmdMessage } from "./sppd/Message.ts";
 
-const demo = new Demo(demoBytes);
+const demo = new Demo(demoBytes, { onFinish: (demo) => {
+  const jumps = demo.messages.filter(message =>
+    message instanceof ConsoleCmdMessage
+    && message.command.startsWith("+jump")
+  );
+  console.log(jumps.length);
+}});
 
-const jumps = demo.messages.filter(message =>
-  message instanceof ConsoleCmdMessage
-  && message.command.startsWith("+jump")
-);
-console.log(jumps.length);
 ```
 
 And here's an example that prints the operating system of the server (yes, demos store that for some reason):
@@ -222,16 +253,16 @@ import { Demo } from "./sppd/Demo.ts";
 import { PacketMessage } from "./sppd/Message.ts";
 import { SvcServerInfo } from "./sppd/NetSvcMessage.ts";
 
-const demo = new Demo(demoBytes);
-
-for (const message of demo.messages) {
-  if (!(message instanceof PacketMessage)) continue;
-  const serverInfo = message.messages.find(m => m instanceof SvcServerInfo);
-  if (serverInfo) {
-    console.log(serverInfo.serverOS === "w" ? "Windows" : "Linux");
-    break;
+const demo = new Demo(demoBytes, { onFinish: (demo) => {
+  for (const message of demo.messages) {
+    if (!(message instanceof PacketMessage)) continue;
+    const serverInfo = message.messages.find(m => m instanceof SvcServerInfo);
+    if (serverInfo) {
+      console.log(serverInfo.serverOS === "w" ? "Windows" : "Linux");
+      break;
+    }
   }
-}
+}});
 ```
 
 ## Console commands
@@ -241,14 +272,16 @@ Console commands have a dedicated `onCommand` event that gets fired whenever a c
 Here's an example that counts the amount of "+jump" inputs without filtering the raw messages:
 ```js
 let jumps = 0;
-new Demo(demoBytes, { onCommand: (demo, command) => {
-
-  // Increment `jumps` for each "+jump" command. We use `startsWith` because
-  // bound action inputs are usually followed by a key identifier.
-  if (command.startsWith("+jump")) {
-    jumps ++;
+new Demo(demoBytes, {
+  onCommand: (demo, command) => {
+    // Increment `jumps` for each "+jump" command. We use `startsWith` because
+    // bound action inputs are usually followed by a key identifier.
+    if (command.startsWith("+jump")) {
+      jumps ++;
+    }
+  },
+  onFinish: () => {
+    console.log(jumps);
   }
-
-}});
-console.log(jumps);
+});
 ```

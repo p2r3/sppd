@@ -87,18 +87,32 @@ export class Demo {
   public baselines: EntityBaseLine[] = [];
 
   /**
+   * Constructs a representation of the demo file from a byte array.
+   * Immediately after being constructed, the object will contain
+   * _only the header_. For accessing other data, use {@link events}.
+   *
    * @param bytes Buffer containing demo file data.
-   * @param events Event handlers (optional):
+   * @param events Event handlers. Aside from `onFinish`, each of these
+   * may be asynchronous. If that's the case, demo parsing is paused until
+   * the returned promise is resolved.
+   *
+   * Event handlers must return a boolean. If it's `true`, demo parsing
+   * continues. If it's `false`, parsing stops and `onFinish` is called
+   * with `success = false`.
+   *
+   * Available events:
    * -  **onTick** is called once per server tick. In a single player
    *    game, odd ticks are skipped due to sv_alternateticks.
    * -  **onCommand** is called every time a console command is fired or a
    *    cvar is changed.
+   * -  **onFinish** is called when the demo has finished parsing.
    */
   constructor (
     bytes: Uint8Array,
     events?: {
-      onTick?: (demo: Demo) => void,
-      onCommand?: (demo: Demo, command: string) => void
+      onTick?: (demo: Demo) => Promise<boolean | void> | boolean | void,
+      onCommand?: (demo: Demo, command: string) => Promise<boolean | void> | boolean | void,
+      onFinish?: (demo: Demo, success: boolean) => void
     }
   ) {
     this.buf = new DemoBuffer(bytes);
@@ -120,30 +134,47 @@ export class Demo {
 
     let lastTick = 0;
 
-    while (this.buf.cursor < this.buf.bytes.length * 8) {
+    const parseAsync = new Promise (async (
+      resolve: (result: boolean) => void,
+      reject: (error: unknown) => void
+    ) => {
+      try {
+        while (this.buf.cursor < this.buf.bytes.length * 8) {
 
-      const message = Message.fromDemo(this);
-      this.messages.push(message);
+          const message = Message.fromDemo(this);
+          this.messages.push(message);
 
-      if (lastTick !== this.state.tick) {
-        if (events && events.onTick) events.onTick(this);
-        lastTick = this.state.tick;
-      }
+          if (lastTick !== this.state.tick) {
+            if (events && events.onTick) events.onTick(this);
+            lastTick = this.state.tick;
+          }
 
-      if (message instanceof StopMessage) break;
+          if (message instanceof StopMessage) break;
 
-      if (!events || !events.onCommand) continue;
-      if (message instanceof ConsoleCmdMessage) {
-        events.onCommand(this, message.command);
-      } else if (message instanceof PacketMessage) {
-        const convarMessage = message.messages.find(m => m instanceof NetSetConVar);
-        if (!convarMessage) continue;
-        for (const { name, value } of convarMessage.convars) {
-          events.onCommand(this, name + " " + value);
+          if (!events || !events.onCommand) continue;
+          if (message instanceof ConsoleCmdMessage) {
+            const success = await events.onCommand(this, message.command);
+            if (success === false) return resolve(false);
+          } else if (message instanceof PacketMessage) {
+            const convarMessage = message.messages.find(m => m instanceof NetSetConVar);
+            if (!convarMessage) continue;
+            for (const { name, value } of convarMessage.convars) {
+              const success = await events.onCommand(this, name + " " + value);
+              if (success === false) return resolve(false);
+            }
+          }
+
         }
+        return resolve(true);
+      } catch (err) {
+        return reject(err);
       }
+    });
 
-    }
+    parseAsync.then(success => {
+      if (!events || !events.onFinish) return;
+      events.onFinish(this, success);
+    });
 
   }
 
