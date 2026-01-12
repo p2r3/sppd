@@ -852,6 +852,17 @@ export class Entity {
     return angles.Scale(180 / Math.PI);
   }
 
+  GetForwardVector (): Vector {
+    return this.GetAngles(true).FromAngles().forward;
+  }
+  GetUpVector (): Vector {
+    return this.GetAngles(true).FromAngles().up;
+  }
+  GetLeftVector (): Vector {
+    const { forward, up } = this.GetAngles(true).FromAngles();
+    return forward.Cross(up);
+  }
+
   SetAngles (pitch: number, yaw: number, roll: number): boolean {
     if (!this.source) return false;
     const properties = new Map(this.properties
