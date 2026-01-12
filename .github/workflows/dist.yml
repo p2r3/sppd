@@ -22,7 +22,7 @@ jobs:
         run: bun i
 
       - name: Install TypeScript compiler
-        run: bun i --global tsc
+        run: bun i --global typescript
 
       - name: Build
         run: tsc -p tsconfig.build.json

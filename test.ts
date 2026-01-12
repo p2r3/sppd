@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "fs";
-import { Demo } from "./sppd/Demo.ts";
+import { Demo } from "./sppd/Demo.js";
 
 if (typeof process.argv[2] !== "string") {
   console.log("Usage: test.js <file.dem>");
