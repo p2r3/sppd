@@ -722,27 +722,84 @@ export class Entity {
     return true;
   }
 
-  GetOrigin (): Vector {
-    const parent = this.GetMoveParent();
-    const parentOrigin = parent ? parent.GetOrigin() : new Vector();
-
+  GetLocalOrigin (): Vector {
+    /**
+     * The player entity excludes m_vecOrigin, so we have to refer to
+     * player-specific data. This _should_ only matter for the player,
+     * but the check is universal just in case.
+     */
     let origin = this.GetProperty("m_vecOrigin");
     if (!(origin instanceof Vector)) {
+      /**
+       * If we didn't get an origin, there are two options:
+       * - grab the origin from "local data" (available for the player who's recording)
+       * - grab the origin from "non-local data" (available for everyone else)
+       * Oh, and the Z component is in its own field for some reason,
+       * hence the deep nesting.
+       */
       origin = this.GetProperty("portallocaldata.m_vecOrigin");
+      if (origin instanceof Vector) {
+        origin = origin.Clone();
+        origin.z = Number(this.GetProperty("portallocaldata.m_vecOrigin[2]")) || 0;
+      } else {
+        origin = this.GetProperty("portalnonlocaldata.m_vecOrigin");
+        if (origin instanceof Vector) {
+          origin = origin.Clone();
+          origin.z = Number(this.GetProperty("portalnonlocaldata.m_vecOrigin[2]")) || 0;
+        }
+      }
+      // If neither source is available, I don't know what's going on, give up.
       if (!(origin instanceof Vector)) {
         return new Vector();
       }
-      origin.z = Number(this.GetProperty("portallocaldata.m_vecOrigin[2]")) || 0;
       return origin;
     }
 
-    const cellPosition = new Vector(
+    /**
+     * Most entities use m_vecOrigin as a "cell-local position" that is
+     * added to the position of the cell to get the world coordinates.
+     *
+     * We first determine the size of a cell (from m_cellbits), then
+     * offset that by a constant (MAX_COORD_INTEGER in Valve's code),
+     * and add it to the origin.
+     */
+    const cellBits = Number(this.GetProperty("m_cellbits")) || 0;
+    const cellWidth = 1 << cellBits;
+
+    const MAX_COORD_VECTOR = new Vector(16384, 16384, 16384);
+
+    const cell = new Vector(
       Number(this.GetProperty("m_cellX")),
       Number(this.GetProperty("m_cellY")),
       Number(this.GetProperty("m_cellZ"))
-    ).Sub(new Vector(512, 512, 512)).Scale(32);
+    );
 
-    return origin.Add(cellPosition).Add(parentOrigin);
+    /**
+     * Some entities avoid using cell bits to get "higher precision".
+     * This behavior is hard-coded for each class, so we can't know for
+     * sure which entities this applies to. Below is a hacky workaround
+     * that determines whether the cell data is meaningful here by
+     * checking if the origin alone exceeds the bounds of a cell.
+     */
+    if (
+      origin.x < 0 || origin.y < 0 || origin.z < 0
+      || origin.x >= cellWidth
+      || origin.y >= cellWidth
+      || origin.z >= cellWidth
+    ) return origin;
+
+    return origin.Add(cell
+      .Scale(cellWidth)
+      .Sub(MAX_COORD_VECTOR)
+    );
+  }
+
+  GetOrigin (): Vector {
+    const parent = this.GetMoveParent();
+    const parentOrigin = parent ? parent.GetOrigin() : new Vector();
+    const parentAngles = parent ? parent.GetAngles(true) : new Vector();
+    const localOrigin = this.GetLocalOrigin();
+    return localOrigin.RotateVector(parentAngles).Add(parentOrigin);
   }
 
   SetAbsOrigin (origin: Vector): boolean {
@@ -774,17 +831,25 @@ export class Entity {
     return this.SetAbsOrigin(origin.Add(parentOrigin));
   }
 
-  GetAngles (): Vector {
+  GetLocalAngles (radians: boolean = false): Vector {
     const angles = this.GetProperty("m_angRotation");
     if (angles instanceof Vector) {
+      if (radians) return angles.Scale(Math.PI / 180);
       return angles.Clone();
     }
     const pitch = this.GetProperty("m_angEyeAngles[0]");
     const yaw = this.GetProperty("m_angEyeAngles[1]");
-    if (typeof pitch !== "number" || typeof yaw !== "number") {
-      return new Vector();
-    }
-    return new Vector(pitch, yaw);
+    const eyeAngles = new Vector(Number(pitch), Number(yaw));
+    if (radians) return eyeAngles.Scale(Math.PI / 180);
+    return eyeAngles;
+  }
+
+  GetAngles (radians: boolean = false): Vector {
+    const parent = this.GetMoveParent();
+    const parentAngles = parent ? parent.GetAngles(true) : new Vector();
+    const angles = this.GetLocalAngles(true).RotateAngles(parentAngles);
+    if (radians) return angles;
+    return angles.Scale(180 / Math.PI);
   }
 
   SetAngles (pitch: number, yaw: number, roll: number): boolean {

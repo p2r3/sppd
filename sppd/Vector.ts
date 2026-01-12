@@ -153,4 +153,169 @@ export class Vector {
     return `${this.x} ${this.y} ${this.z}`;
   }
 
+  /**
+   * @categoryDescription Utility methods
+   * Miscellaneous utility methods for working with data in vectors.
+   * Some of these are ported from [ppmod](https://github.com/p2r3/ppmod).
+   */
+
+  /**
+   * Similar to the Array `map` method, applies a function to each element of the vector.
+   * @param callback Function to call for each element of the vector.
+   * The function is provided the value and index of the current component.
+   * @returns A new vector, gained from applying the callback to each element.
+   */
+  map (callback: (value: number, index?: number) => number): Vector {
+    return new Vector(
+      callback(this.x, 0),
+      callback(this.y, 1),
+      callback(this.z, 2)
+    );
+  }
+
+  /**
+   * Normalizes this vector in-place and returns it,
+   * discarding the length byproduct.
+   * @returns This vector, normalized.
+   */
+  Normalize (): Vector {
+    this.Norm();
+    return this;
+  }
+
+  /**
+   * Rotates the coordinate vector by a given set of Euler angles.
+   * @param angles Euler angles (pitch, yaw, roll) to rotate by, in radians.
+   * @returns A new, rotated vector. Original vector is not modified.
+   */
+  RotateVector (angles: Vector): Vector {
+    // Precompute sines and cosines of angles
+    const cy = Math.cos(angles.y), sy = Math.sin(angles.y);
+    const cp = Math.cos(angles.x), sp = Math.sin(angles.x);
+    const cr = Math.cos(angles.z), sr = Math.sin(angles.z);
+
+    // Build rotation matrix
+    const m00 = cp * cy;
+    const m01 = cp * sy;
+    const m02 = -sp;
+
+    const m10 = sr * sp * cy - cr * sy;
+    const m11 = sr * sp * sy + cr * cy;
+    const m12 = sr * cp;
+
+    const m20 = cr * sp * cy + sr * sy;
+    const m21 = cr * sp * sy - sr * cy;
+    const m22 = cr * cp;
+
+    // Build output vector from matrix
+    return new Vector(
+      this.x * m00 + this.y * m10 + this.z * m20,
+      this.x * m01 + this.y * m11 + this.z * m21,
+      this.x * m02 + this.y * m12 + this.z * m22
+    );
+  }
+
+  /**
+   * Converts direction vector(s) to a vector of pitch/yaw/roll angles.
+   * The vector on which this method is called is treated as the
+   * forward-vector.
+   * @param up Up-vector, optional. If provided, used for calculating roll.
+   * @returns A new vector containing Euler angles in radians, in the form
+   * (pitch, yaw, roll). Original vector is not modified.
+   */
+  ToAngles (up?: Vector): Vector {
+    // Clone and normalize the forward vector (`this`)
+    const forward = this.Clone();
+    forward.Norm();
+    // Calculate yaw/pitch angles
+    const yaw = Math.atan2(forward.y, forward.x);
+    const pitch = Math.asin(-forward.z);
+    let roll = 0;
+    // If an up vector is given, calculate roll
+    // Reference: https://www.jldoty.com/code/DirectX/YPRfromUF/YPRfromUF.html
+    if (up) {
+      // Clone and normalize the input up vector
+      up = up.Clone();
+      up.Norm();
+      // Calculate the current right vector
+      const rvec = up.Cross(forward).Normalize();
+      // Ensure the up vector is orthonormal
+      up = forward.Cross(rvec).Normalize();
+      // Calculate right/up vectors at zero roll
+      const x0 = new Vector(0, 0, 1).Cross(forward).Normalize();
+      const y0 = forward.Cross(x0);
+      // Calculate the sine and cosine of the roll angle
+      const rollcos = y0.Dot(up);
+      let rollsin;
+      if (Math.abs(Math.abs(forward.z) - 1) < 0.000001) {
+        // Edge case for the forward.z +/- 1.0 singularity
+        rollsin = -up.x;
+      } else {
+        // Choose a denominator that won't divide by zero
+        const s = x0.map(Math.abs);
+        const c = (s.x > s.y) ? (s.x > s.z ? "x" : "z") : (s.y > s.z ? "y" : "z");
+        // Calculate the roll angle sine
+        rollsin = (y0[c] * rollcos - up[c]) / x0[c];
+      }
+      // Calculate the signed roll angle
+      roll = Math.atan2(rollsin, rollcos);
+    }
+    // Return angles as a pitch/yaw/roll vector
+    return new Vector(pitch, yaw, roll);
+  }
+
+  /**
+   * For a set of Euler angles in the form (pitch, yaw, roll) in radians,
+   * returns forward-, left-, and up-vectors.
+   * @returns Set of forward- and up-facing unit vectors representing the
+   * input angles. Original vector is not modified.
+   */
+  FromAngles (): { forward: Vector, up: Vector } {
+    // Precompute sines and cosines of angles
+    const cy = Math.cos(this.y), sy = Math.sin(this.y);
+    const cp = Math.cos(this.x), sp = Math.sin(this.x);
+    const cr = Math.cos(this.z), sr = Math.sin(this.z);
+
+    // Get forward/up vectors
+    const forward = new Vector(cy * cp, sy * cp, -sp);
+    const wRight = forward.Cross(new Vector(0, 0, 1)).Normalize();
+    const up = wRight.Cross(forward).Normalize().Scale(cr).Add(wRight.Scale(sr));
+
+    return { forward, up };
+  }
+
+  /**
+   * Rotates this vector as a set of (pitch, yaw, roll) Euler angles
+   * in radians by another set of such angles.
+   * @param rotation Set of Euler angles of form (pitch, yaw, roll)
+   * in radians, to rotate by.
+   * @returns A new vector containing a rotated set of angles.
+   */
+  RotateAngles (rotation: Vector): Vector {
+    // Parent basis
+    const parentBasis = rotation.FromAngles();
+    const parentForward = parentBasis.forward;
+    const parentUp = parentBasis.up;
+    const parentRight = parentUp.Cross(parentForward).Normalize();
+
+    // Local basis
+    const localBasis = this.FromAngles();
+    const localForward = localBasis.forward;
+    const localUp = localBasis.up;
+
+    // Rotate local basis into parent space
+    const worldForward =
+      parentForward.Scale(localForward.x)
+        .Add(parentRight.Scale(localForward.y))
+        .Add(parentUp.Scale(localForward.z));
+
+    const worldUp =
+      parentForward.Scale(localUp.x)
+        .Add(parentRight.Scale(localUp.y))
+        .Add(parentUp.Scale(localUp.z));
+
+    // Convert back to angles
+    return worldForward.ToAngles(worldUp);
+  }
+
 }
