@@ -1,13 +1,13 @@
-import { Demo } from "./Demo.ts";
-import { DemoBuffer } from "./DemoBuffer.ts";
-import { Vector } from "./Vector.ts";
+import { Demo } from "./Demo.js";
+import { DemoBuffer } from "./DemoBuffer.js";
+import { Vector } from "./Vector.js";
 import {
   DataTableProperty,
   DataTablePropertyType,
   DataTablePropertyFlag,
   ServerClass,
   FlatProperty
-} from "./DataTable.ts";
+} from "./DataTable.js";
 
 type EntityPropertyValueType = (
     number

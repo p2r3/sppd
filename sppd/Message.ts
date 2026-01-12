@@ -4,12 +4,12 @@
  * @module
  */
 
-import { Demo } from "./Demo.ts";
-import { DemoBuffer } from "./DemoBuffer.ts";
-import { Vector } from "./Vector.ts";
-import { NetSvcMessage } from "./NetSvcMessage.ts";
-import { StringTable } from "./StringTable.ts";
-import { DataTable, ServerClass, ParserClass } from "./DataTable.ts";
+import { Demo } from "./Demo.js";
+import { DemoBuffer } from "./DemoBuffer.js";
+import { Vector } from "./Vector.js";
+import { NetSvcMessage } from "./NetSvcMessage.js";
+import { StringTable } from "./StringTable.js";
+import { DataTable, ServerClass, ParserClass } from "./DataTable.js";
 
 /**
  * Base message class, doesn't represent any data on its own.

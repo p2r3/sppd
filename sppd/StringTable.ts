@@ -4,9 +4,9 @@
  * @module
  */
 
-import { Demo } from "./Demo.ts";
-import { EntityProperty, EntityBaseLine } from "./Entity.ts";
-import type { ServerClass } from "./DataTable.ts";
+import { Demo } from "./Demo.js";
+import { EntityProperty, EntityBaseLine } from "./Entity.js";
+import type { ServerClass } from "./DataTable.js";
 
 /**
  * A single entry of a {@link StringTable}.

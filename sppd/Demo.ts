@@ -1,17 +1,17 @@
-import { DemoBuffer } from "./DemoBuffer.ts";
-import { DataTable, ServerClass, ParserClass } from "./DataTable.ts";
-import { Entities, EntityBaseLine } from "./Entity.ts";
-import { StringTable } from "./StringTable.ts";
+import { DemoBuffer } from "./DemoBuffer.js";
+import { DataTable, ServerClass, ParserClass } from "./DataTable.js";
+import { Entities, EntityBaseLine } from "./Entity.js";
+import { StringTable } from "./StringTable.js";
 import {
   Message,
   ConsoleCmdMessage,
   PacketMessage,
   StopMessage,
   CmdInfo
-} from "./Message.ts";
+} from "./Message.js";
 import {
   NetSetConVar
-} from "./NetSvcMessage.ts"
+} from "./NetSvcMessage.js"
 
 /**
  * User-friendly interface for the current state of the demo.

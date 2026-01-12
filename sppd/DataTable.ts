@@ -1,4 +1,4 @@
-import { Demo } from "./Demo.ts";
+import { Demo } from "./Demo.js";
 
 export enum DataTablePropertyType {
   Int = 0,

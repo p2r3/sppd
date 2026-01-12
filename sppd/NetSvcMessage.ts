@@ -1,8 +1,7 @@
-import { Demo } from "./Demo.ts";
-import { DemoBuffer } from "./DemoBuffer.ts";
-import { Vector } from "./Vector.ts";
-import { Message } from "./Message.ts";
-import { ServerClass } from "./DataTable.ts";
+import { Demo } from "./Demo.js";
+import { DemoBuffer } from "./DemoBuffer.js";
+import { Vector } from "./Vector.js";
+import { ServerClass } from "./DataTable.js";
 import {
   Entity,
   Entities,
@@ -11,8 +10,8 @@ import {
   EntityDelta,
   EntityEnterPVS,
   EntityLeavePVS
-} from "./Entity.ts";
-import { StringTable, StringTableEntry } from "./StringTable.ts";
+} from "./Entity.js";
+import { StringTable, StringTableEntry } from "./StringTable.js";
 
 export class NetSvcMessage {
 
