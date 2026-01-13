@@ -304,15 +304,15 @@ export class Vector {
     const localUp = localBasis.up;
 
     // Rotate local basis into parent space
-    const worldForward =
-      parentForward.Scale(localForward.x)
-        .Add(parentRight.Scale(localForward.y))
-        .Add(parentUp.Scale(localForward.z));
+    const worldForward = parentForward
+      .Scale(localForward.x)
+      .Add(parentRight.Scale(localForward.y))
+      .Add(parentUp.Scale(localForward.z));
 
-    const worldUp =
-      parentForward.Scale(localUp.x)
-        .Add(parentRight.Scale(localUp.y))
-        .Add(parentUp.Scale(localUp.z));
+    const worldUp = parentForward
+      .Scale(localUp.x)
+      .Add(parentRight.Scale(localUp.y))
+      .Add(parentUp.Scale(localUp.z));
 
     // Convert back to angles
     return worldForward.ToAngles(worldUp);
