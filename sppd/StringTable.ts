@@ -5,7 +5,7 @@
  */
 
 import { Demo } from "./Demo.js";
-import { EntityProperty, EntityBaseLine } from "./Entity.js";
+import { EntityProperty, StaticBaseline } from "./Entity.js";
 import type { ServerClass } from "./DataTable.js";
 
 /**
@@ -38,7 +38,7 @@ export class StringTableEntry {
     switch (tableName) {
       case "userinfo": return new PlayerInfo(tableName, entryName, demo, compression);
       case "server_query_info": return new QueryPort(tableName, entryName, demo, compression);
-      case "instancebaseline": return new InstanceBaseLine(tableName, entryName, demo, compression);
+      case "instancebaseline": return new InstanceBaseline(tableName, entryName, demo, compression);
       case "GameRulesCreation": return new StringEntryData(tableName, entryName, demo, compression);
       case "InfoPanel": return new StringEntryData(tableName, entryName, demo, compression);
       case "lightstyles": return new LightStyle(tableName, entryName, demo, compression);
@@ -123,14 +123,14 @@ export class QueryPort extends StringTableEntry {
  * @prop serverClass Entity class for which this table is defining baselines.
  * @prop entityProperties List of entity properties parsed from this table.
  */
-export class InstanceBaseLine extends StringTableEntry {
+export class InstanceBaseline extends StringTableEntry {
   public serverClass?: ServerClass;
   public entityProperties?: EntityProperty[];
   constructor (tableName: string, entryName: string, demo: Demo, compression?: number | null) {
     super(tableName, entryName);
 
     if (demo.parserClasses === null) {
-      console.warn("Received InstanceBaseLine before DataTables.");
+      console.warn("Received InstanceBaseline before DataTables.");
       return;
     }
 
@@ -147,7 +147,7 @@ export class InstanceBaseLine extends StringTableEntry {
     this.serverClass = serverClass;
 
     this.entityProperties = EntityProperty.readProperties(demo, flatProperties);
-    EntityBaseLine.updateBaseLine(demo, serverClass, this.entityProperties, flatProperties.length);
+    StaticBaseline.updateBaseline(demo, serverClass, this.entityProperties, flatProperties.length);
 
   }
 }
@@ -222,7 +222,7 @@ export class StringTableClass {
  *    Table size is 64, though Portal 2 only ever uses the first 2 slots.
  * - `server_query_info`: Entries of {@link QueryPort}.
  *    One entry, just the port number.
- * - `instancebaseline`: Entries of {@link InstanceBaseLine},
+ * - `instancebaseline`: Entries of {@link InstanceBaseline},
  *    one per entity class. Fills in default property values.
  * - `GameRulesCreation`: Entries of {@link StringEntryData}.
  *    Normally just one entry containing the class name of the current

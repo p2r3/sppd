@@ -481,7 +481,15 @@ export class EntityProperty {
 
 }
 
-export class EntityBaseLine {
+/**
+ * Static (class) baseline. Stores "default" information about an entity
+ * class, as obtained from string tables.
+ *
+ * Note: There _is_ another type of baseline, the "dynamic" or "entity"
+ * baseline, but this parser doesn't handle those explicitly in favor of
+ * simply maintaining full entity state throughout.
+ */
+export class StaticBaseline {
 
   public serverClass: ServerClass;
   public entityProperties: EntityProperty[];
@@ -491,7 +499,7 @@ export class EntityBaseLine {
     this.entityProperties = entityProperties;
   }
 
-  static updateBaseLine (
+  static updateBaseline (
     demo: Demo,
     serverClass: ServerClass,
     entityProperties: EntityProperty[],
@@ -499,7 +507,7 @@ export class EntityBaseLine {
   ) {
     const id = serverClass.tableID;
     if (!demo.baselines[id]) {
-      demo.baselines[id] = new EntityBaseLine(serverClass, new Array(flatPropertyCount));
+      demo.baselines[id] = new StaticBaseline(serverClass, new Array(flatPropertyCount));
     }
     const baseLine = demo.baselines[id];
 
@@ -591,13 +599,13 @@ export class Entity {
     this.source = source;
   }
 
-  static fromBaseLine (demo: Demo, serverClass: ServerClass, serial: number, index: number): Entity {
+  static fromBaseline (demo: Demo, serverClass: ServerClass, serial: number, index: number): Entity {
 
     const tableID = serverClass.tableID;
     let baseline = demo.baselines[tableID];
     if (!baseline) {
       console.warn(`Missing baseline for "${serverClass.className}", creating blank.`);
-      baseline = new EntityBaseLine(serverClass, []);
+      baseline = new StaticBaseline(serverClass, []);
       demo.baselines[tableID] = baseline;
     }
 
@@ -616,7 +624,7 @@ export class Entity {
     return new Entity(serverClass, newProperties, serial, index, true, demo);
   }
 
-  static enterPVS (demo: Demo, update: EntityEnterPVS, updateBaseline: boolean): void {
+  static enterPVS (demo: Demo, update: EntityEnterPVS): void {
     if (demo.baselines.length === 0) {
       throw "Tried to parse entity update without baselines.";
     }
@@ -626,7 +634,7 @@ export class Entity {
 
     let entity;
     if (update.isNew) {
-      entity = Entity.fromBaseLine(demo, update.serverClass, update.serial, update.index);
+      entity = Entity.fromBaseline(demo, update.serverClass, update.serial, update.index);
       demo.state.entities[update.index] = entity;
     } else {
       entity = demo.state.entities[update.index];
@@ -639,9 +647,6 @@ export class Entity {
     entity.inPVS = true;
     Entity.applyDelta(demo, update);
 
-    if (updateBaseline) {
-      EntityBaseLine.updateBaseLine(demo, update.serverClass, entity.properties, entity.properties.length);
-    }
   }
 
   static leavePVS (demo: Demo, update: EntityLeavePVS): void {

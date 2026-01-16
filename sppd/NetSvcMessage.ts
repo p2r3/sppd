@@ -529,7 +529,7 @@ export class SvcPacketEntities extends NetSvcMessage {
   public maxEntries: number;
   public isDelta: boolean;
   public deltaFrom?: number;
-  public baseline: number;
+  public baselineIndex: number;
   public updatedEntries: number;
   public updateBaseline: boolean;
   public updates: EntityUpdate[] = [];
@@ -541,7 +541,7 @@ export class SvcPacketEntities extends NetSvcMessage {
     if (this.isDelta) {
       this.deltaFrom = demo.buf.nextSignedInt(32);
     }
-    this.baseline = demo.buf.nextBit();
+    this.baselineIndex = demo.buf.nextBit();
     this.updatedEntries = demo.buf.nextInt(11);
     const dataLength = demo.buf.nextInt(20);
     this.updateBaseline = !!demo.buf.nextBit();
@@ -616,7 +616,7 @@ export class SvcPacketEntities extends NetSvcMessage {
           const isNew = !entity || entity.serial !== serial;
           const entityProperties = EntityProperty.readProperties(demo, parserClass.flatProperties);
           const update = new EntityEnterPVS(parserClass.serverClass, index, entityProperties, serial, isNew);
-          Entity.enterPVS(demo, update, this.updateBaseline);
+          Entity.enterPVS(demo, update);
           this.updates.push(update);
           break;
         }

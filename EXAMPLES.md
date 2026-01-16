@@ -90,7 +90,7 @@ Here's a rough map of the `Demo` object:
   - `stringTables: Map<string, StringTable>`
   - `serverClasses: ServerClass[]`
   - `parserClasses: ParserClass[]`
-  - `baselines: EntityBaseLine[]`
+  - `baselines: StaticBaseline[]`
 
 Surface-level information can be gathered from the header, or by looking through the `messages` during/after parsing. However, for more interactive demo analysis, you'll probably want to use `state.entities` from within the `onTick` event handler to interact with in-game objects as they move around.
 

@@ -1,6 +1,6 @@
 import { DemoBuffer } from "./DemoBuffer.js";
 import { DataTable, ServerClass, ParserClass } from "./DataTable.js";
-import { Entities, EntityBaseLine } from "./Entity.js";
+import { Entities, StaticBaseline } from "./Entity.js";
 import { StringTable } from "./StringTable.js";
 import {
   Message,
@@ -59,7 +59,7 @@ class DemoState implements DemoStateInterface {
  * @prop serverClasses List of server-side classes reported by the demo.
  * @prop stringTables String table data, mainly from the StringTables message.
  * @prop parserClasses Reconstructed server classes with properties.
- * @prop baselines Entity baselines, i.e. the "default" properties of each entity.
+ * @prop baselines Entity baselines, i.e. the "default" properties of each entity class.
  */
 export class Demo {
 
@@ -84,7 +84,7 @@ export class Demo {
   public serverClasses: ServerClass[] | null = null;
   public stringTables: Map<string, StringTable> = new Map();
   public parserClasses: ParserClass[] | null = null;
-  public baselines: EntityBaseLine[] = [];
+  public baselines: StaticBaseline[] = [];
 
   /**
    * Constructs a representation of the demo file from a byte array.
