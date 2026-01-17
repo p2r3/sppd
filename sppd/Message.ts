@@ -163,12 +163,14 @@ export class SyncTickMessage extends Message {
  * [See here](https://github.com/UncraftedName/UntitledParser/blob/de6dffd18c186413c861c26bdb260aaaca6e4955/DemoParser/src/Parser/Components/Packets/DataTables.cs#L11)
  * for a more in-depth explanation.
  *
- * @prop dataTables List of DataTables/SendTables parsed from this message.
- * @prop serverClasses List of ServerClass-to-DataTable mappings parsed from this message.
+ * @prop dataTables List of DataTables/SendTables parsed from this message,
+ * with each entry indexed by table name.
+ * @prop serverClasses List of ServerClass-to-DataTable mappings parsed
+ * from this message.
  */
 export class DataTablesMessage extends Message {
 
-  dataTables: DataTable[] = [];
+  dataTables: Map<string, DataTable> = new Map();
   serverClasses: ServerClass[] = [];
 
   /** Parses the message from a Demo object. */
@@ -179,7 +181,8 @@ export class DataTablesMessage extends Message {
     const dataEnd = dataLength + demo.buf.cursor;
 
     while (demo.buf.nextBit()) {
-      this.dataTables.push(new DataTable(demo));
+      const currTable = new DataTable(demo);
+      this.dataTables.set(currTable.name, currTable);
     }
     const classCount = demo.buf.nextInt(16);
     for (let i = 0; i < classCount; i ++) {

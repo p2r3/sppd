@@ -171,7 +171,7 @@ export class ParserClass {
 
     for (const serverClass of demo.serverClasses) {
       const tableID = serverClass.tableID;
-      const table = demo.dataTables[tableID];
+      const table = demo.dataTables.get(serverClass.tableName);
       if (!table) {
         console.warn(`Missing DataTable of server class "${serverClass.className}".`);
         continue;
@@ -199,7 +199,7 @@ export class ParserClass {
     for (const property of table.properties) {
       if (typeof property.excludeName === "undefined") continue;
       if (property.type === DataTablePropertyType.DataTable) {
-        const excludeTable = demo.dataTables.find(c => c.name === property.excludeName);
+        const excludeTable = demo.dataTables.get(property.excludeName);
         if (!excludeTable) {
           console.warn(`Missing excluded table "${property.excludeName}" for table "${table.name}"`);
           continue;
@@ -262,9 +262,14 @@ export class ParserClass {
 
       if (property.type === DataTablePropertyType.DataTable) {
 
-        const excludeTable = demo.dataTables.find(c => c.name === property.excludeName);
+        const { excludeName } = property;
+        if (!excludeName) {
+          console.warn(`Property of type DataTable is missing name of excluded table.`);
+          continue;
+        }
+        const excludeTable = demo.dataTables.get(excludeName);
         if (!excludeTable) {
-          console.warn(`Missing excluded table "${property.excludeName}" for table "${table.name}".`);
+          console.warn(`Missing excluded table "${excludeName}" for table "${table.name}".`);
           continue;
         }
         if (property.hasFlag(DataTablePropertyFlag.Collapsible)) {

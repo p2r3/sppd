@@ -55,7 +55,7 @@ class DemoState implements DemoStateInterface {
  * @prop state User-facing interface for the current state of the demo.
  *
  * @prop buf Internal bitstream buffer, seeked as the demo is parsed.
- * @prop dataTables List of raw SendTables/DataTables found in the demo.
+ * @prop dataTables List of raw SendTables/DataTables found in the demo, indexed by table name.
  * @prop serverClasses List of server-side classes reported by the demo.
  * @prop stringTables String table data, mainly from the StringTables message.
  * @prop parserClasses Reconstructed server classes with properties.
@@ -80,7 +80,7 @@ export class Demo {
   public state: DemoStateInterface;
   // Internal
   public buf: DemoBuffer;
-  public dataTables: DataTable[] | null = null;
+  public dataTables: Map<string, DataTable> | null = null;
   public serverClasses: ServerClass[] | null = null;
   public stringTables: Map<string, StringTable> = new Map();
   public parserClasses: ParserClass[] | null = null;
